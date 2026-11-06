@@ -24,7 +24,7 @@ export default function Contact() {
         </h2>
 
         <div className="relative mt-12 border-t rule pt-12">
-          <MagneticButton href={`mailto:${profile.email}`} className="mb-8 ml-auto h-36 w-36 bg-copper text-base font-medium text-ink md:h-48 md:w-48 md:text-lg lg:absolute lg:-top-11 lg:right-24 lg:mb-0">
+          <MagneticButton href={`mailto:${profile.email}`} className="mb-8 ml-auto flex w-fit h-36 w-36 bg-copper text-base font-medium text-ink md:h-48 md:w-48 md:text-lg lg:absolute lg:-top-11 lg:right-24 lg:mb-0">
             Get in touch
           </MagneticButton>
           <ul className="flex flex-wrap gap-3 lg:pt-4">

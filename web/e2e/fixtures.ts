@@ -1,4 +1,4 @@
-import { test as base, expect, type BrowserContext } from '@playwright/test';
+import { test as base, expect, type BrowserContext, type Page } from '@playwright/test';
 
 // RULE: no spec may reach a real drum API (POST /drum emails the owner). Specs import `test` from here, and every
 // `browser.newContext(...)` MUST be followed by `await blockApi(ctx)` (new contexts skip the fixture below).
@@ -16,3 +16,9 @@ export const test = base.extend({
   },
 });
 export { expect };
+
+/** Plays a phrase ('LHLH') as F/J key presses inside #drum: one CDP call per beat, so beats never drift past the 2 s idle reset. */
+export const play = async (page: Page, tones: string) => {
+  await page.getByRole('button', { name: 'Low drum' }).focus();
+  for (const t of tones) await page.keyboard.press(t === 'L' ? 'f' : 'j');
+};

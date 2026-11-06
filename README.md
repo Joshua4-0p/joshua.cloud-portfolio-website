@@ -1,4 +1,4 @@
-# Josue.cloud — Before SNS, there was the drum
+# Joshua.Cloud — Before SNS, there was the drum
 
 Portfolio of **Tiaya Fotseu Josue** — Cloud & DevOps Engineer · Serverless Developer, Buea, Cameroon — built for the AWS Student Builder Challenge ("Build Your Tech Superpower").
 
@@ -19,7 +19,7 @@ A two-tone slit drum, inspired by the talking-drum and slit-drum traditions of C
 | AWS service | Purpose | Est. monthly cost |
 |---|---|---|
 | AWS Amplify Hosting | Git-connected CI/CD; serves the static export through CloudFront with security headers | ~$0 |
-| Amazon API Gateway (HTTP API) | `GET /drum` (counter) and `POST /drum` (phrase), throttled 2 rps / burst 10 | ~$0 |
+| Amazon API Gateway (HTTP API) | `GET /drum` (counter) and `POST /drum` (phrase), throttled POST 2 rps / burst 10, GET 20 rps / burst 50 | ~$0 |
 | AWS Lambda (Node.js 22, arm64) | Validates `^[LH]{4}$`, increments the counter, publishes to SNS | ~$0 |
 | Amazon DynamoDB (on-demand) | "Rhythms have crossed the cloud" counter | ~$0 |
 | Amazon SNS | `drum-telegraph` fan-out (SQS archive + email, max 1/min); `ops-alerts` for alarms | ~$0 |

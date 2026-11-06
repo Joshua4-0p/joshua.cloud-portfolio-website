@@ -67,3 +67,19 @@ test('hero marquee speeds up with scroll velocity (1x-4x) and settles back', asy
   expect(peak).toBeLessThanOrEqual(4);
   await expect.poll(rate, { timeout: 5000 }).toBe(1);
 });
+
+test('entering a section plays the swell, with or without the motion layer', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __noise: number };
+    w.__noise = 0;
+    const c = AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource = function () { w.__noise++; return c.call(this); };
+  });
+  await page.goto('/');
+  await page.waitForTimeout(1500); // past load + the motion layer (when motion is on)
+  await page.locator('[data-sound-toggle]').last().click(); // the floating pill: no scroll
+  await page.waitForTimeout(300);
+  const base = await count(page, '__noise'); // turning sound on may prime the context with a silent buffer
+  await page.mouse.wheel(0, 1500); // a real scroll gesture (Lenis drives ScrollTrigger from wheel input)
+  await expect.poll(() => count(page, '__noise')).toBeGreaterThan(base);
+});

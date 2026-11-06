@@ -10,16 +10,19 @@ const DRUM = new THREE.Vector3(0, 1.75, 0);
 const TOPIC = new THREE.Vector3(0, 2.7, -2.6);
 // Exactly the two real SNS subscribers — nothing implied that doesn't exist.
 const SUBS = [
-  { label: "Josue's inbox (email)", at: new THREE.Vector3(-3.3, 0.35, -2.4) },
-  { label: 'Village archive (SQS)', at: new THREE.Vector3(3.3, 0.35, -2.4) },
+  { label: "Josue's inbox (email)", x: -3.3 },
+  { label: 'Village archive (SQS)', x: 3.3 },
 ];
+// drei's Html wrapper div takes pointer events by default and would swallow taps on the lips beneath a label.
+const NO_HIT = { pointerEvents: 'none' } as const;
+const NARROW = 560; // canvas px below which the subscribers move inward and labels wrap (phones)
 const UP = 0.9, OUT = 1.1; // seconds per leg
 
 const curve = (a: THREE.Vector3, b: THREE.Vector3, lift: number) =>
   new THREE.QuadraticBezierCurve3(a, a.clone().lerp(b, 0.5).add(new THREE.Vector3(0, lift, 0)), b);
 
 const Label = ({ children, side = false }: { children: string; side?: boolean }) => (
-  <div className={`${side ? 'translate-x-[calc(50%+30px)] ' : ''}pointer-events-none whitespace-nowrap font-mono text-[11px] tracking-wide text-signal/90 select-none`}>{children}</div>
+  <div className={`${side ? 'translate-x-[calc(50%+30px)] ' : ''}pointer-events-none whitespace-pre rounded bg-ink/60 px-1.5 py-0.5 text-center font-mono text-[11px] leading-tight tracking-wide text-signal/90 select-none`}>{children}</div>
 );
 
 function Node({ at, size }: { at: THREE.Vector3; size: number }) {
@@ -58,8 +61,13 @@ export default function FanOut() {
   // A fixed label target: drei's default flips to `events.connected` after the first label mounts and drops it.
   const gl = useThree((s) => s.gl);
   const portal = useMemo(() => ({ current: gl.domElement.parentElement! }), [gl]);
+  const narrow = useThree((s) => s.size.width) < NARROW;
+  const subs = useMemo(() => SUBS.map((s) => ({
+    label: narrow ? s.label.replace(' (', '\n(') : s.label,
+    at: new THREE.Vector3(narrow ? s.x * 0.72 : s.x, 0.35, -2.4),
+  })), [narrow]);
   const up = useMemo(() => curve(DRUM, TOPIC, 0.6), []);
-  const outs = useMemo(() => SUBS.map((s) => curve(TOPIC, s.at, 0.9)), []);
+  const outs = useMemo(() => subs.map((s) => curve(TOPIC, s.at, 0.9)), [subs]);
   const lines = useMemo(() => {
     const m = new THREE.LineBasicMaterial({ color: SIGNAL, transparent: true, opacity: 0.18 });
     return [up, ...outs].map((c) => new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(40)), m));
@@ -92,11 +100,11 @@ export default function FanOut() {
     <group>
       {lines.map((l, i) => <primitive key={i} object={l} />)}
       <Node at={TOPIC} size={0.12} />
-      <Html portal={portal} position={TOPIC} center zIndexRange={[1, 0]}><Label side>Amazon SNS topic</Label></Html>
-      {SUBS.map((s) => (
+      <Html portal={portal} position={narrow ? [TOPIC.x, TOPIC.y - 0.45, TOPIC.z] : TOPIC} center zIndexRange={[1, 0]} style={NO_HIT}><Label side={!narrow}>Amazon SNS topic</Label></Html>
+      {subs.map((s) => (
         <group key={s.label}>
           <Node at={s.at} size={0.1} />
-          <Html portal={portal} position={[s.at.x, s.at.y - 0.32, s.at.z]} center zIndexRange={[1, 0]}><Label>{s.label}</Label></Html>
+          <Html portal={portal} position={[s.at.x, s.at.y - 0.32, s.at.z]} center zIndexRange={[1, 0]} style={NO_HIT}><Label>{s.label}</Label></Html>
         </group>
       ))}
       {[0, 1, 2].map((i) => <Packet key={i} meshRef={(m) => { packets.current[i] = m; }} />)}

@@ -40,7 +40,8 @@ export default function DrumCanvas({ variant, className = '' }: { variant: Varia
         height={1000}
         fetchPriority={variant === 'hero' ? 'high' : 'auto'}
         loading={variant === 'hero' ? 'eager' : 'lazy'}
-        className="absolute inset-0 h-full w-full object-cover"
+        // The hero canvas is transparent: the poster must go once the drum is drawn over it.
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${shown ? 'opacity-0' : ''}`}
       />
       {mount && (
         <div aria-hidden="true" className={`absolute inset-0 transition-opacity duration-700 ${shown ? 'opacity-100' : 'opacity-0'}`}>

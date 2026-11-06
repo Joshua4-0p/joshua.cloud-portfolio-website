@@ -48,3 +48,34 @@ test('with the 3D drum running, a phrase still decodes', async ({ browser }) => 
   await expect(page.getByText('1 / 8 messages decoded')).toBeVisible();
   await ctx.close();
 });
+
+test('touch: a tap on a 3D lip counts once; a swipe that starts on it scrolls without a beat', async ({ browser }) => {
+  skipReduced();
+  const { ctx, page } = await open3D(browser, { hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+  await page.goto('/#drum');
+  const box = page.locator('#drum .drum-canvas');
+  await box.scrollIntoViewIfNeeded();
+  await expect(page.locator('#drum canvas')).toBeAttached({ timeout: 5000 });
+  await page.waitForTimeout(1500); // canvas faded in
+  const b = (await box.boundingBox())!;
+  const x = b.x + b.width * 0.42, y = b.y + b.height * 0.447; // the low lip
+  // Count every counted hit (a lip hit takes the pad path, which flashes the pad), immune to the 2 s idle reset.
+  await page.getByRole('button', { name: 'Low drum' }).evaluate((el) => {
+    const w = window as unknown as { __hits: number };
+    w.__hits = 0;
+    new MutationObserver(() => { if (el.classList.contains('is-hit')) w.__hits++; }).observe(el, { attributeFilter: ['class'] });
+  });
+  const hits = () => page.evaluate(() => (window as unknown as { __hits: number }).__hits);
+  await page.touchscreen.tap(x, y);
+  await expect.poll(hits).toBe(1); // one tap, one beat (and proves the spot is a lip)
+  // Tap first: Chrome swallows a tap that stops a fling, so tapping after the swipe would prove nothing.
+  const cdp = await ctx.newCDPSession(page);
+  const y0 = await page.evaluate(() => scrollY);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+  for (let i = 1; i <= 8; i++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y - i * 15 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y0); // it was a real scroll
+  await page.waitForTimeout(300);
+  expect(await hits()).toBe(1); // the swipe added no beat
+  await ctx.close();
+});

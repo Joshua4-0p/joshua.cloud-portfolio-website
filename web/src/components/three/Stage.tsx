@@ -29,40 +29,49 @@ function Kick({ stage, active }: { stage: boolean; active: boolean }) {
 export default function Stage({ variant, active, onReady }: { variant: Variant; active: boolean; onReady: () => void }) {
   const stage = useSyncExternalStore(subStage, isStage, () => false);
   const l = stage ? LOOK.stage : LOOK.quiet;
+  const hero = variant === 'hero';
   return (
     <Canvas
       dpr={[1, 1.5]}
       frameloop={active ? 'demand' : 'never'}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: true, powerPreference: 'high-performance', alpha: hero }}
       shadows="percentage"
-      camera={{ position: [0, 5.2, 6.9], fov: 34 }}
+      camera={{ position: hero ? [0, 4.3, 5.7] : [0, 5.2, 6.9], fov: 34 }}
       onCreated={({ camera }) => { camera.lookAt(0, 0.9, -0.9); requestAnimationFrame(onReady); }}
       style={{ touchAction: 'pan-y' }}
     >
       <Kick stage={stage} active={active} />
-      <color attach="background" args={[l.bg]} />
-      <fog attach="fog" args={[l.bg, 7, 17]} />
+      {/* Hero: transparent, so the drum sits on the hero gradient; only its shadow touches the page. */}
+      {!hero && <color attach="background" args={[l.bg]} />}
+      {!hero && <fog attach="fog" args={[l.bg, 7, 17]} />}
       <ambientLight intensity={l.ambient} color="#FFD9B8" />
       <spotLight position={[-3, 6, 4]} angle={0.42} penumbra={0.9} intensity={l.keyI} color={l.key} castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} />
       <spotLight position={[4, 4.5, -3.5]} angle={0.5} penumbra={1} intensity={l.rimI} color={l.rim} />
       <SlitDrum variant={variant} />
       {variant === 'stage' && <FanOut />}
-      <mesh rotation-x={-Math.PI / 2} receiveShadow>
-        <planeGeometry args={[40, 40]} />
-        <MeshReflectorMaterial
-          resolution={512}
-          blur={[0, 0]}
-          mixBlur={1}
-          mixStrength={40}
-          roughness={0.75}
-          depthScale={1}
-          minDepthThreshold={0.4}
-          maxDepthThreshold={1.3}
-          color={stage ? '#1E0F07' : '#17130F'}
-          metalness={0.45}
-          mirror={0.75}
-        />
-      </mesh>
+      {hero ? (
+        <mesh rotation-x={-Math.PI / 2} receiveShadow>
+          <planeGeometry args={[40, 40]} />
+          <shadowMaterial opacity={0.45} />
+        </mesh>
+      ) : (
+        <mesh rotation-x={-Math.PI / 2} receiveShadow>
+          <planeGeometry args={[40, 40]} />
+          <MeshReflectorMaterial
+            resolution={512}
+            blur={[0, 0]}
+            mixBlur={1}
+            mixStrength={40}
+            roughness={0.75}
+            depthScale={1}
+            minDepthThreshold={0.4}
+            maxDepthThreshold={1.3}
+            color={stage ? '#1E0F07' : '#17130F'}
+            metalness={0.45}
+            mirror={0.75}
+          />
+        </mesh>
+      )}
     </Canvas>
   );
 }

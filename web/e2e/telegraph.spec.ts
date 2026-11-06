@@ -1,9 +1,6 @@
-import { test, expect } from './fixtures';
+import { test, expect, play as phrase } from './fixtures';
 import type { Page } from '@playwright/test';
 
-const phrase = async (page: Page, tones: string) => {
-  for (const t of tones) await page.getByRole('button', { name: t === 'L' ? 'Low drum' : 'High drum' }).click();
-};
 const delivered = (page: Page) => page.getByText('Delivered via Amazon SNS');
 
 test('delivery line and counter appear when the API answers', async ({ page }) => {

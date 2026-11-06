@@ -149,8 +149,10 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   return (
     <section id="drum" tabIndex={-1} aria-labelledby="drum-title" onKeyDown={onKeyDown} onPointerDown={onPointerDown} className="drum-stage outline-none relative overflow-hidden px-5 py-24 md:px-10 md:py-32">
       <div className="relative mx-auto max-w-[1600px]">
-        <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-5">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-12">
+          {/* Below lg both columns flatten (display: contents) so the order reads: heading, pads, beats, card, the
+              explanation, then the 3D drum — landing on /#drum on a phone shows the pads without scrolling. */}
+          <div className="max-lg:contents lg:col-span-5">
             <DrumHeading />
             <noscript>
               <p className="mt-6 max-w-xl text-[15px] text-bone/80">The drum needs JavaScript to play. All eight messages are listed below as text.</p>
@@ -160,12 +162,12 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
             </p>
           </div>
 
-          <div className="text-center lg:col-span-7">
-            <DrumCanvas variant="stage" className="mx-auto w-full max-w-[760px]" />
+          <div className="flex flex-col text-center max-lg:contents lg:col-span-7">
+            <DrumCanvas variant="stage" className="mx-auto mt-8 w-full max-w-[760px] lg:mt-0" />
 
-            <Pads onHit={onHit} padRefs={padRefs} />
+            <div className="max-lg:-order-1 max-lg:mt-10"><Pads onHit={onHit} padRefs={padRefs} /></div>
 
-            <div className="mt-8 flex flex-col items-center gap-2">
+            <div className="mt-8 flex flex-col items-center gap-2 max-lg:-order-1">
               <p className="font-mono text-[11px] tracking-[0.25em] text-ash">BEATS</p>
               <p className="relative flex h-8 w-[8.25rem] items-center gap-3 text-2xl leading-none text-copper-hi">
                 <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center gap-3">
@@ -182,7 +184,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
 
             <div aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
 
-            <div className="mt-8 min-h-8">
+            <div className="mt-8 min-h-8 max-lg:-order-1">
               {card && <MessageCard key={card.key} decoded={card.d} first={card.d.index === 0} delivery={delivery[card.key] ? <Delivery {...delivery[card.key]} /> : undefined} />}
               {total !== null && <p className="mt-4 font-mono text-xs text-signal"><Rhythms n={total} /></p>}
             </div>

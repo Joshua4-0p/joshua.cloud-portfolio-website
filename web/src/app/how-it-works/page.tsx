@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'How this site is built — Tiaya Fotseu Josue',
   description: 'Architecture of the Talking Drum portfolio: Next.js static export on AWS Amplify Hosting, and a Drum Telegraph on API Gateway, Lambda, DynamoDB and SNS, built with AWS CDK.',
   alternates: { canonical: '/how-it-works/' },
-  openGraph: { type: 'website', siteName: 'Josue.cloud', images: [{ url: '/og.png', width: 1200, height: 630 }], url: 'https://main.d2edrxdeaouf1j.amplifyapp.com/how-it-works/', title: 'How this site is built — Tiaya Fotseu Josue' },
+  openGraph: { type: 'website', siteName: 'Joshua.Cloud', images: [{ url: '/og.png', width: 1200, height: 630 }], url: 'https://main.d2edrxdeaouf1j.amplifyapp.com/how-it-works/', title: 'How this site is built — Tiaya Fotseu Josue' },
 };
 
 // Read at build time and inlined, so the diagram's text is in the HTML. Same file is docs/architecture.svg.
@@ -21,7 +21,7 @@ const diagram = readFileSync(path.join(process.cwd(), 'public/architecture.svg')
 // monitoring are deployed in Phase 2 of the build plan, before submission.
 const services: [string, string, string][] = [
   ['AWS Amplify Hosting', 'Builds every push from GitHub and serves the static site through CloudFront, with security headers.', '~$0'],
-  ['Amazon API Gateway', 'HTTP API with GET /drum and POST /drum, throttled to 2 requests/s (burst 10), CORS limited to this site (plus localhost for development).', '~$0'],
+  ['Amazon API Gateway', 'HTTP API with GET /drum and POST /drum, throttled to 2 requests/s for POST (burst 10) and 20 requests/s for GET (burst 50), CORS limited to this site (plus localhost for development).', '~$0'],
   ['AWS Lambda', 'Node.js 22 on arm64, 128 MB: validates the phrase, counts it, publishes it.', '~$0 (free tier)'],
   ['Amazon DynamoDB', 'On-demand table holding the "rhythms have crossed the cloud" counter.', '~$0'],
   ['Amazon SNS', 'Topic drum-telegraph archives every phrase in SQS and emails me at most once a minute (a subscription filter policy); topic ops-alerts carries alarms.', '~$0'],
@@ -60,7 +60,7 @@ export default function HowItWorks() {
           <p className="mt-6 max-w-3xl text-lg leading-relaxed text-bone/85">
             A drummer publishes one rhythm and every village in earshot receives it. That is publish/subscribe, and it is what
             Amazon SNS does. This portfolio is a static Next.js site on AWS Amplify Hosting; when you play a phrase on the
-            Talking Drum, it travels through a small serverless system defined in AWS CDK and fans out to two real subscribers.
+            Talking Drum, it travels through a small serverless system defined in AWS CDK and fans out to two real subscribers: an SQS archive that receives every rhythm, and my inbox, which gets at most one email a minute.
           </p>
 
           <H2>Architecture</H2>

@@ -1,4 +1,4 @@
-import { test, expect, blockApi } from './fixtures';
+import { test, expect, blockApi, play } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 
 // Phase-1 review fixes. Motion is ON here (default context), which is where SplitText runs.
@@ -66,8 +66,7 @@ test('holding Enter on a pad counts one hit', async ({ page }) => {
 
 test('?mode=stage does not persist all 8 as decoded', async ({ page }) => {
   await page.goto('/?mode=stage');
-  const low = page.getByRole('button', { name: 'Low drum' }), high = page.getByRole('button', { name: 'High drum' });
-  await low.click(); await high.click(); await low.click(); await high.click();
+  await play(page, 'LHLH');
   await page.goto('/#drum');
   await expect(page.getByText('1 / 8 messages decoded')).toBeVisible();
 });
@@ -98,9 +97,14 @@ test('contact button never overlaps the title at any width', async ({ page }) =>
   for (const width of [360, 390, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/#contact');
-    const h = await page.locator('#contact-title').boundingBox(), b = await page.getByRole('link', { name: 'Get in touch' }).boundingBox();
-    expect(h && b, `boxes at ${width}`).toBeTruthy();
-    const overlap = h!.x < b!.x + b!.width && b!.x < h!.x + h!.width && h!.y < b!.y + b!.height && b!.y < h!.y + h!.height;
+    // Both rects in one frame, after fonts settle: two separate boundingBox() calls could straddle a scroll.
+    const [h, b] = await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(requestAnimationFrame);
+      const r = (el: Element | null) => el!.getBoundingClientRect().toJSON() as DOMRect;
+      return [r(document.getElementById('contact-title')), r([...document.querySelectorAll('#contact a')].find((a) => a.textContent?.trim() === 'Get in touch') ?? null)];
+    });
+    const overlap = h.x < b.x + b.width && b.x < h.x + h.width && h.y < b.y + b.height && b.y < h.y + h.height;
     expect(overlap, `overlap at ${width}`).toBe(false);
   }
 });

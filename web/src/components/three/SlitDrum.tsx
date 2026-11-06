@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
+import { RoundedBox } from '@react-three/drei';
 import type { Tone } from '@/lib/drum-engine';
 import { onHit, requestHit } from '@/lib/drum-bus';
 import { audio } from '@/lib/audio';
@@ -78,14 +79,27 @@ export default function SlitDrum({ variant }: { variant: Variant }) {
   // The stage drum follows every counted hit (pads, keys, its own lips via requestHit).
   useEffect(() => (variant === 'stage' ? onHit(strike) : undefined), [variant, strike]);
 
-  const lipDown = (t: Tone) => (e: ThreeEvent<PointerEvent>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    e.stopPropagation();
+  const hitLip = (t: Tone) => {
     if (variant === 'stage') { requestHit(t); return; }
     // Hero teaser: a note and a ripple, never counted toward phrases.
     soundOnFirstHit();
     audio.drum(t);
     strike(t);
+  };
+  // One physical hit = one hitLip. Mouse/pen: on pointerdown (same-frame feedback). Touch: on the click that follows a
+  // tap, because a pan that starts on a lip sends pointercancel and no click, so a scroll never plays the drum.
+  const touchDown = useRef(false);
+  const lipDown = (t: Tone) => (e: ThreeEvent<PointerEvent>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.stopPropagation();
+    touchDown.current = e.pointerType === 'touch';
+    if (!touchDown.current) hitLip(t);
+  };
+  const lipClick = (t: Tone) => () => {
+    audio.unlock();
+    if (!touchDown.current) return;
+    touchDown.current = false;
+    hitLip(t);
   };
 
   useFrame((state, dt) => {
@@ -143,15 +157,26 @@ export default function SlitDrum({ variant }: { variant: Variant }) {
             })}
           </group>
         ))}
-        {/* the slit: a dark channel with two tongues (lips) */}
-        <mesh position={[0, TOP - 0.004, 0]}>
+        {/* the slit: a dark groove, sunk below a thin bevelled rim, with two rounded tongues (lips) in it */}
+        <mesh position={[0, TOP - 0.01, 0]}>
           <boxGeometry args={[2.55, 0.03, 0.36]} />
-          <meshStandardMaterial color="#0B0503" roughness={1} />
+          <meshStandardMaterial color="#050201" roughness={1} />
         </mesh>
+        {[-1, 1].map((s) => (
+          <group key={s}>
+            <mesh position={[0, TOP + 0.002, s * 0.195]}>
+              <boxGeometry args={[2.63, 0.03, 0.03]} />
+              <meshStandardMaterial color="#6A3517" roughness={0.5} metalness={0.2} />
+            </mesh>
+            <mesh position={[s * 1.3, TOP + 0.002, 0]}>
+              <boxGeometry args={[0.04, 0.03, 0.42]} />
+              <meshStandardMaterial color="#6A3517" roughness={0.5} metalness={0.2} />
+            </mesh>
+          </group>
+        ))}
         {(['L', 'H'] as Tone[]).map((t) => (
-          <group key={t} position={[LIPS[t].x, TOP + 0.012, 0]}>
-            <mesh castShadow>
-              <boxGeometry args={[LIPS[t].len, 0.04, 0.22]} />
+          <group key={t} position={[LIPS[t].x, TOP + 0.006, 0]}>
+            <RoundedBox args={[LIPS[t].len, 0.04, 0.22]} radius={0.018} smoothness={3} castShadow>
               <meshStandardMaterial
                 ref={(m) => { lipMat.current[t] = m; }}
                 color={t === 'L' ? '#7A3A16' : '#A0532A'}
@@ -160,9 +185,9 @@ export default function SlitDrum({ variant }: { variant: Variant }) {
                 emissive={COPPER_HI}
                 emissiveIntensity={0}
               />
-            </mesh>
+            </RoundedBox>
             {/* invisible, generous hit area (raycasts ignore `visible`), so a tap needn't land on the thin lip */}
-            <mesh visible={false} position-y={0.12} onPointerDown={lipDown(t)} onClick={() => audio.unlock()} onPointerOver={hover(true)} onPointerOut={hover(false)}>
+            <mesh visible={false} position-y={0.12} onPointerDown={lipDown(t)} onClick={lipClick(t)} onPointerOver={hover(true)} onPointerOut={hover(false)}>
               <boxGeometry args={[LIPS[t].len - 0.04, 0.32, 0.7]} />
             </mesh>
           </group>
