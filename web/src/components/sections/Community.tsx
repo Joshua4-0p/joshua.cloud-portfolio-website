@@ -10,7 +10,7 @@ function Timeline({ items }: { items: { org: string; role: string; period: strin
             <h4 className="text-lg font-medium leading-snug">{e.org}</h4>
             <p className="mt-1 font-mono text-xs text-ash">{e.role}</p>
           </div>
-          <p className="text-[15px] leading-relaxed text-bone/80 md:col-span-6">{e.summary}</p>
+          {e.summary.replace(/\.$/, '') !== e.role.replace(/\.$/, '') && <p className="text-[15px] leading-relaxed text-bone/80 md:col-span-6">{e.summary}</p>}
         </li>
       ))}
     </ol>

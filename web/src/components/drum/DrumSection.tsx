@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { DRUM_MESSAGES } from '@/content/site';
 import { enterStage, exitStage, hit, initialState, type Decoded, type DrumState, type Tone } from '@/lib/drum-engine';
-import { emitDecoded, emitHit } from '@/lib/drum-bus';
+import { emitDecoded, emitDelivered, emitHit, onDelivered } from '@/lib/drum-bus';
+import { getCount, sendPhrase } from '@/lib/telegraph';
 import { loadDecoded, loadSound, saveDecoded, hasSoundPref } from '@/lib/storage';
 import { audio } from '@/lib/audio';
 import SoundPill, { useRestoreSound } from '../SoundPill';
@@ -14,12 +15,19 @@ import { AllMessages, DrumHeading } from './DrumIntro';
 
 const TOTAL = DRUM_MESSAGES.length;
 const noop = () => () => {};
+const Delivery = ({ messageId, count }: { messageId: string; count: number }) => (
+  <p className="mt-5 border-t border-bone/10 pt-4 font-mono text-xs text-signal">Delivered via Amazon SNS · msg {messageId.slice(0, 4)}… · rhythm #{count}</p>
+);
 
 export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 'normal' | 'stage' }) {
   const [state, setState] = useState<DrumState>(() => initialState());
   const stateRef = useRef(state);
   const [card, setCard] = useState<{ d: Decoded; key: number } | null>(null);
   const [announce, setAnnounce] = useState('');
+  const [delivery, setDelivery] = useState<Record<number, { messageId: string; count: number }>>({});
+  const [total, setTotal] = useState<number | null>(null);
+  const seqRef = useRef(0);
+  const stageAnnounced = useRef(false);
   const [showList, setShowList] = useState(false);
   const padRefs = useRef<Record<Tone, HTMLButtonElement | null>>({ L: null, H: null });
   const fromUrl = useRef(false);
@@ -27,6 +35,13 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   const hitTimers = useRef<Record<Tone, number>>({ L: 0, H: 0 });
   const soundSupported = useSyncExternalStore(noop, audio.isSupported, () => true);
   useRestoreSound();
+
+  useEffect(() => {
+    let live = true;
+    getCount().then((n) => { if (live && n !== null) setTotal((t) => t ?? n); });
+    const off = onDelivered((d) => { setDelivery((m) => ({ ...m, [d.seq]: d })); setTotal((t) => Math.max(t ?? 0, d.count)); });
+    return () => { live = false; off(); };
+  }, []);
 
   const commit = useCallback((s: DrumState) => { stateRef.current = s; setState(s); }, []);
 
@@ -49,7 +64,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     if (prevStage.current === state.stage) return;
     prevStage.current = state.stage;
     if (fromUrl.current) { fromUrl.current = false; return; } // no announcement for the ?mode=stage load
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- announcing a change that came from user input
+    if (stageAnnounced.current) { stageAnnounced.current = false; return; } // the secret phrase already announced both
     setAnnounce(state.stage ? 'Stage Mode on — all 8 messages are in "Read the messages".' : 'Stage Mode off.');
   }, [state.stage]);
 
@@ -75,15 +90,22 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     audio.drum(tone);
     emitHit(tone);
 
+    const wasStage = stateRef.current.stage;
     const r = hit(stateRef.current, tone, performance.now());
     commit(r.state);
     if (r.decoded) {
       const d = r.decoded;
       saveDecoded(r.state.decoded);
-      setCard((c) => ({ d, key: (c?.key ?? 0) + 1 }));
-      setAnnounce(`Message ${d.index + 1} of ${TOTAL}: ${DRUM_MESSAGES[d.index]}`);
+      const seq = ++seqRef.current;
+      setCard({ d, key: seq });
+      const msg = `Message ${d.index + 1} of ${TOTAL}: ${DRUM_MESSAGES[d.index]}`;
+      const entersStage = r.state.stage && !wasStage;
+      stageAnnounced.current = entersStage;
+      setAnnounce(entersStage ? `${msg} Stage Mode on — all 8 messages are in "Read the messages".` : msg);
       audio.chime();
-      emitDecoded(d);
+      emitDecoded({ ...d, seq });
+      // Fire and forget: the drum has already decoded; a failed or slow API just means no delivery line.
+      void sendPhrase(d.phrase).then((res) => { if (res) emitDelivered({ seq, ...res }); });
     }
   }, [commit]);
 
@@ -139,7 +161,8 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
             <div aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
 
             <div className="mt-8 min-h-8">
-              {card && <MessageCard key={card.key} decoded={card.d} first={card.d.index === 0} />}
+              {card && <MessageCard key={card.key} decoded={card.d} first={card.d.index === 0} delivery={delivery[card.key] ? <Delivery {...delivery[card.key]} /> : undefined} />}
+              {total !== null && <p className="mt-4 font-mono text-xs text-signal">{total} rhythms have crossed the cloud</p>}
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

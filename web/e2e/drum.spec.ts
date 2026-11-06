@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test('first message within one phrase, keyboard + pointer', async ({ page }) => {
   await page.goto('/#drum');

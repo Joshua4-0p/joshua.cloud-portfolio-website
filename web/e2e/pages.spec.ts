@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test('how-it-works: heading, accessible diagram, services table', async ({ page }) => {
   await page.goto('/how-it-works/');

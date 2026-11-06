@@ -1,7 +1,9 @@
 // Tiny event bus: the drum UI emits; telegraph (Task 7) and 3D scene (Task 8) listen.
 import type { Decoded, Tone } from './drum-engine';
 
-type Delivered = { messageId: string; count: number };
+// `seq` ties a delivery to the card (decode) that caused it, so a late reply can't land on a newer card.
+export type DecodedEvent = Decoded & { seq: number };
+type Delivered = { seq: number; messageId: string; count: number };
 
 function channel<T>() {
   const subs = new Set<(v: T) => void>();
@@ -12,7 +14,7 @@ function channel<T>() {
 }
 
 const hits = channel<Tone>();
-const decodes = channel<Decoded>();
+const decodes = channel<DecodedEvent>();
 const deliveries = channel<Delivered>();
 
 export const emitHit = hits.emit;

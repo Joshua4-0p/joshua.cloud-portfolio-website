@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { profile } from '@/content/site';
 import Emblem from '@/components/Emblem';
+import LiveCounter from '@/components/LiveCounter';
 import Footer from '@/components/sections/Footer';
 
 export const metadata: Metadata = {
@@ -72,6 +73,10 @@ export default function HowItWorks() {
           <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-bone/70">
             The site never waits for the API: the drum decodes instantly in the browser, and the call has a 3-second timeout. If it
             fails, you still get your message — only the “Delivered via Amazon SNS” line is missing.
+          </p>
+
+          <p className="mt-6 font-mono text-sm text-bone/80" data-testid="live-endpoint">
+            Live endpoint: <code>GET https://wr3ti5s9xj.execute-api.us-east-1.amazonaws.com/drum</code> <LiveCounter />
           </p>
 
           <H2>AWS services</H2>

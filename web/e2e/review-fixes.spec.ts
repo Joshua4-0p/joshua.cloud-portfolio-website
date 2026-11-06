@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 
 // Phase-1 review fixes. Motion is ON here (default context), which is where SplitText runs.
