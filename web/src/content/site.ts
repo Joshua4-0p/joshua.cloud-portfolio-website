@@ -23,7 +23,7 @@ export const profile = {
   aboutLead:
     'I build serverless systems on AWS that carry messages from one place to many — the modern version of what a drummer has always done.',
   aboutStory:
-    "I was born in Bafoussam and did my O-Levels there, then moved to Dschang for A-Level science. Today I'm in Buea, a 4th-year Computer Engineering student at the University of Buea, building and shipping serverless applications on AWS. My parents spoke French and English at home, and I've studied in the English section since childhood. Being bilingual made me flexible: I can work with very different groups of people. I started playing drums in Lower Sixth and guitar in Level 300. I used to draw cartoons and manga, and I still write.",
+    "I was born in Bafoussam and did my O-Levels there, then moved to Dschang for A-Level science. Today I'm in Buea, a 4th-year Computer Engineering student at the University of Buea, building and shipping serverless applications on AWS. I grew up bilingual in English and French, and that made me flexible: I can work with very different groups of people. I play drums, and I write.",
   now: [
     'Software Engineer at DIGISOL Group',
     'Technical Community Program Manager at Cloud Builders Africa',
@@ -173,7 +173,7 @@ export const projects: Project[] = [
     name: 'AfriPay',
     period: 'May 2025 – present',
     problem: 'Cross-border payments for merchants across Africa.',
-    role: 'Full-stack developer.',
+    role: 'Builder (in progress).',
     stack: ['Next.js', 'Tailwind CSS', 'Node.js', 'Express'],
     decisions: 'Merchant payments go through the Nkwa Pay aggregator; a blockchain-based wallet handles user ↔ merchant transfers.',
     outcome: 'Live web app for merchant payments across Africa.',

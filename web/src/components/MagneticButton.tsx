@@ -1,6 +1,6 @@
 'use client';
 import { useRef, type ReactNode } from 'react';
-import { isFinePointer, prefersReducedMotion } from '@/lib/motion';
+import { isFinePointer, prefersReducedMotion } from '@/lib/media';
 
 // A link that drifts toward the pointer on fine-pointer devices. No-op on touch and under reduced motion.
 export default function MagneticButton({ href, children, className = '' }: { href: string; children: ReactNode; className?: string }) {

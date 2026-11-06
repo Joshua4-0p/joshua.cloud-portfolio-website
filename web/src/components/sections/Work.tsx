@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { projects, moreProjects, type Project } from '@/content/site';
 import ProjectCover from '../ProjectCover';
-import { isFinePointer, prefersReducedMotion } from '@/lib/motion';
+import { isFinePointer, prefersReducedMotion } from '@/lib/media';
 
 type View = 'list' | 'grid';
 const WIDE = '(min-width: 1024px)';

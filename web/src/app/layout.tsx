@@ -5,7 +5,7 @@ import "./globals.css";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], variable: "--font-anton", display: "swap" });
 const interTight = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight", display: "swap" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap", preload: false });
 
 const title = `${profile.name} — Cloud & DevOps Engineer`;
 const description = `${profile.name}: Cloud & DevOps Engineer and Serverless Developer in Buea, Cameroon. ${profile.tagline} Play the talking drum — your rhythm travels through Amazon SNS.`;

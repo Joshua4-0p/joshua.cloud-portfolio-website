@@ -9,13 +9,13 @@ const useSoundOn = () => useSyncExternalStore(audio.subscribe, audio.isOn, () =>
 export function useRestoreSound() {
   useEffect(() => {
     if (!loadSound() || audio.isOn()) return;
-    const cleanup = () => { window.removeEventListener('pointerdown', arm); window.removeEventListener('keydown', arm); };
+    const cleanup = () => { window.removeEventListener('click', arm); window.removeEventListener('keydown', arm); };
     // A gesture on the toggle itself is handled by the toggle; anything else re-arms the remembered choice.
     function arm(e: Event) {
       if (!(e.target as Element | null)?.closest?.('[data-sound-toggle]') && !audio.wasChosen()) audio.setOn(true);
       cleanup();
     }
-    window.addEventListener('pointerdown', arm);
+    window.addEventListener('click', arm);
     window.addEventListener('keydown', arm);
     return cleanup;
   }, []);
@@ -33,21 +33,20 @@ export default function SoundPill({ variant = 'floating' }: { variant?: 'floatin
   );
   if (variant === 'inline')
     return (
-      <button type="button" aria-pressed={on} aria-label="Sound" data-sound-toggle onClick={toggle} className="inline-flex items-center gap-2 hover:text-copper-hi">
-        {bars} Sound {on ? 'on' : 'off'}
+      <button type="button" aria-pressed={on} data-sound-toggle onClick={toggle} className="inline-flex items-center gap-2 hover:text-copper-hi">
+        {bars} Sound <span aria-hidden="true">{on ? 'on' : 'off'}</span>
       </button>
     );
   return (
     <button
       type="button"
       aria-pressed={on}
-      aria-label="Sound"
       data-sound-toggle
       onClick={toggle}
       className="fixed bottom-4 right-4 z-40 hidden md:inline-flex items-center gap-2.5 rounded-full bg-bone/95 px-4 py-2.5 font-mono text-xs tracking-wider text-ink shadow-lg backdrop-blur transition-colors hover:bg-copper-hi md:bottom-6 md:right-8"
     >
       {bars}
-      <span>SOUND {on ? 'ON' : 'OFF'}</span>
+      <span>SOUND <span aria-hidden="true">{on ? 'ON' : 'OFF'}</span></span>
     </button>
   );
 }

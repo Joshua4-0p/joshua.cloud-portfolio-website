@@ -5,10 +5,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 
-export const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-export const isFinePointer = () => typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+import { prefersReducedMotion } from './media';
+export { prefersReducedMotion, isFinePointer } from './media';
 
 let lenis: Lenis | null = null;
 export const getLenis = () => lenis;
@@ -26,20 +24,20 @@ export function initMotion(): () => void {
   const splits: SplitText[] = [];
   const ctx = gsap.context(() => {
     document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
-      const inHero = !!el.closest('#hero');
       splits.push(
         SplitText.create(el, {
           type: 'lines',
+          // aria-label is only valid on headings; elsewhere leave the split lines readable as-is.
+          aria: el.matches('h1, h2, h3, h4, h5, h6') ? 'auto' : 'none',
           mask: 'lines',
           autoSplit: true,
           onSplit: (self) =>
             gsap.from(self.lines, {
               yPercent: 110,
-              duration: inHero ? 0.9 : 0.8,
+              duration: 0.8,
               ease: 'power3.out',
               stagger: 0.08,
-              delay: inHero ? 0.1 : 0,
-              scrollTrigger: inHero ? undefined : { trigger: el, start: 'top 88%', once: true },
+              scrollTrigger: { trigger: el, start: 'top 88%', once: true },
             }),
         }),
       );

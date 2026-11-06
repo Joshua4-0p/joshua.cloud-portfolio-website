@@ -29,7 +29,7 @@ export default function Hero() {
           <span aria-hidden="true" className="mb-4 hidden text-2xl text-copper md:block">↘</span>
           <h1 id="hero-title">
             <span className="mb-3 block font-mono text-xs tracking-[0.25em] text-copper-hi">{profile.name.toUpperCase()}</span>
-            <span data-reveal className="block text-[clamp(28px,3.1vw,48px)] font-medium leading-[1.08] tracking-tight">
+            <span className="hero-intro block text-[clamp(28px,3.1vw,48px)] font-medium leading-[1.08] tracking-tight">
               {profile.titlesPrimary[0]}
               <br />
               {profile.titlesPrimary[1]}

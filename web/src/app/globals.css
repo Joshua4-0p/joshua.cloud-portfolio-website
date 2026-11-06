@@ -57,6 +57,10 @@ body {
 .marquee-track { display: flex; width: max-content; animation: marquee 38s linear infinite; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
+/* Hero intro: CSS only, so it runs on first paint and never re-hides text later */
+.hero-intro { animation: hero-intro 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
+@keyframes hero-intro { from { opacity: 0; transform: translateY(0.5em); } }
+
 /* Hint pulse: one ring every 8 s */
 .pulse-ring::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;

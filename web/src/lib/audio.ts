@@ -72,6 +72,11 @@ export const audio = {
   isOn: () => on,
   subscribe(cb: () => void) { subs.add(cb); return () => { subs.delete(cb); }; },
   wasChosen: () => chosen,
+  /** Call from click/pointerup/touchend: those count as user activation on mobile, pointerdown does not. */
+  unlock() {
+    if (!on || !ctx) return;
+    void ctx.resume().catch(() => {});
+  },
   setOn(next: boolean, byUser = false) {
     if (byUser) chosen = true;
     on = next && audio.isSupported();

@@ -65,7 +65,8 @@ export default function Community() {
 
         <div className="mt-20">
           <Label>IN THE ROOM</Label>
-          <ul className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0">
+          <div tabIndex={0} role="region" aria-label="Community photos (scrolls sideways)" className="-mx-5 snap-x snap-mandatory overflow-x-auto px-5 pb-4 md:mx-0 md:overflow-visible md:px-0">
+          <ul className="flex gap-4 md:grid md:grid-cols-5">
             {photos.map((p) => (
               <li key={p.src} className="w-[72vw] shrink-0 snap-start md:w-auto">
                 <figure className="duotone">
@@ -75,6 +76,7 @@ export default function Community() {
               </li>
             ))}
           </ul>
+          </div>
         </div>
 
         <div className="mt-20 grid gap-10 md:grid-cols-12">
