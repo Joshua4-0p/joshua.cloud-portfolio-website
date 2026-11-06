@@ -327,4 +327,4 @@ export const SECRET_PHRASE = 'LLHL';
 export const CULTURAL_FRAMING = 'inspired by the talking-drum and slit-drum traditions of Cameroon and West & Central Africa';
 export const LAST_UPDATED = '6 Nov 2026';
 // Live Amplify URL (Task 4 sets it; also used by canonical, OG, sitemap).
-export const SITE_URL = 'https://example.amplifyapp.com';
+export const SITE_URL = 'https://main.d2edrxdeaouf1j.amplifyapp.com';

@@ -2,7 +2,7 @@
 
 Portfolio of **Tiaya Fotseu Josue** — Cloud & DevOps Engineer · Serverless Developer, Buea, Cameroon — built for the AWS Student Builder Challenge ("Build Your Tech Superpower").
 
-**Live site:** SITE_URL_PLACEHOLDER · **Play the drum:** SITE_URL_PLACEHOLDER/#drum · **Stage Mode:** SITE_URL_PLACEHOLDER/?mode=stage · **How it's built:** SITE_URL_PLACEHOLDER/how-it-works/
+**Live site:** https://main.d2edrxdeaouf1j.amplifyapp.com · **Play the drum:** https://main.d2edrxdeaouf1j.amplifyapp.com/#drum · **Stage Mode:** https://main.d2edrxdeaouf1j.amplifyapp.com/?mode=stage · **How it's built:** https://main.d2edrxdeaouf1j.amplifyapp.com/how-it-works/
 
 ## The one creative feature: The Talking Drum
 
