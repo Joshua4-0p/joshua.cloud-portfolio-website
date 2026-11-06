@@ -1,16 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 const fmt = () =>
   new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Douala', hour: '2-digit', minute: '2-digit' }).format(new Date());
+const subscribe = (cb: () => void) => {
+  const id = setInterval(cb, 15_000);
+  return () => clearInterval(id);
+};
 
-// Live local time in Buea; static fallback is rendered at build time and without JS.
+// Live local time in Buea; the static fallback is what the build (and no-JS visitors) get.
 export default function BueaClock() {
-  const [time, setTime] = useState<string | null>(null);
-  useEffect(() => {
-    setTime(fmt());
-    const id = setInterval(() => setTime(fmt()), 30_000);
-    return () => clearInterval(id);
-  }, []);
-  return <span suppressHydrationWarning>{time ? `${time} WAT` : 'WAT, UTC+1'}</span>;
+  const time = useSyncExternalStore(subscribe, fmt, () => null);
+  return <span>{time ? `${time} WAT` : 'WAT, UTC+1'}</span>;
 }

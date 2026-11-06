@@ -1,10 +1,16 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { projects, moreProjects, type Project } from '@/content/site';
 import ProjectCover from '../ProjectCover';
 import { isFinePointer, prefersReducedMotion } from '@/lib/motion';
 
 type View = 'list' | 'grid';
+const WIDE = '(min-width: 1024px)';
+const subscribeWide = (cb: () => void) => {
+  const mq = window.matchMedia(WIDE);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
 
 function CaseStudy({ p }: { p: Project }) {
   const rows: [string, string][] = [
@@ -57,15 +63,17 @@ function LearningBadge() {
 }
 
 export default function Work() {
-  const [view, setView] = useState<View>('list');
+  // Default: list on wide screens (hover preview), grid below 1024px; the toggle overrides.
+  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE).matches, () => true);
+  const [chosen, setView] = useState<View | null>(null);
+  const view: View = chosen ?? (wide ? 'list' : 'grid');
   const [hovered, setHovered] = useState<number | null>(null);
   const preview = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!window.matchMedia('(min-width: 1024px)').matches) setView('grid');
     const openFromHash = (hash: string) => {
       if (!hash.startsWith('#project-')) return;
-      const d = document.querySelector<HTMLDetailsElement>(`${hash} details`);
+      const d = document.getElementById(hash.slice(1))?.querySelector('details');
       if (d) d.open = true;
     };
     openFromHash(location.hash);
