@@ -19,6 +19,10 @@ export class TalkingDrumStack extends cdk.Stack {
     super(scope, id, props);
     const siteUrl = this.node.tryGetContext('siteUrl');
     if (!siteUrl) throw new Error('pass -c siteUrl=https://...');
+    const opsEmail = this.node.tryGetContext('opsEmail');
+    if (!opsEmail) throw new Error('pass -c opsEmail=<ops alert email>');
+    const budgetEmail = this.node.tryGetContext('budgetEmail');
+    if (!budgetEmail) throw new Error('pass -c budgetEmail=<budget alert email>');
 
     const table = new ddb.Table(this, 'Drums', {
       partitionKey: { name: 'pk', type: ddb.AttributeType.STRING },
@@ -27,7 +31,9 @@ export class TalkingDrumStack extends cdk.Stack {
     });
 
     const topic = new sns.Topic(this, 'Telegraph', { topicName: 'drum-telegraph' });
-    topic.addSubscription(new subs.EmailSubscription('josuefotseu02@gmail.com'));
+    topic.addSubscription(new subs.EmailSubscription('josuefotseu02@gmail.com', {
+      filterPolicy: { email: sns.SubscriptionFilter.stringFilter({ allowlist: ['yes'] }) }, // max 1 email/min; SQS gets all
+    }));
     const queue = new sqs.Queue(this, 'Archive', {
       queueName: 'village-archive',
       encryption: sqs.QueueEncryption.SQS_MANAGED,
@@ -56,6 +62,7 @@ export class TalkingDrumStack extends cdk.Stack {
         allowOrigins: [siteUrl, 'http://localhost:3000', 'http://localhost:4321'],
         allowMethods: [apigw.CorsHttpMethod.GET, apigw.CorsHttpMethod.POST],
         allowHeaders: ['content-type'],
+        maxAge: cdk.Duration.hours(2),
       },
     });
     const integration = new HttpLambdaIntegration('DrumInt', fn);
@@ -67,7 +74,7 @@ export class TalkingDrumStack extends cdk.Stack {
 
     // Monitoring
     const ops = new sns.Topic(this, 'OpsAlerts', { topicName: 'ops-alerts' });
-    ops.addSubscription(new subs.EmailSubscription('ops@example.com'));
+    ops.addSubscription(new subs.EmailSubscription(opsEmail));
     const alarmAction = new cwActions.SnsAction(ops);
 
     const canary = new synthetics.Canary(this, 'SiteCanary', {
@@ -101,7 +108,14 @@ exports.handler = async () => {
         treatMissingData: cw.TreatMissingData.NOT_BREACHING,
       }).addAlarmAction(alarmAction);
 
-    const budgetSub = [{ subscriptionType: 'EMAIL', address: 'budget@example.com' }];
+    api.metricServerError({ period: cdk.Duration.minutes(5) })
+      .createAlarm(this, 'Api5xx', {
+        threshold: 1, evaluationPeriods: 1,
+        comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        treatMissingData: cw.TreatMissingData.NOT_BREACHING,
+      }).addAlarmAction(alarmAction);
+
+    const budgetSub = [{ subscriptionType: 'EMAIL', address: budgetEmail }];
     const notif = (notificationType: string, threshold: number) => ({
       notification: { notificationType, comparisonOperator: 'GREATER_THAN', threshold, thresholdType: 'PERCENTAGE' },
       subscribers: budgetSub,
@@ -112,6 +126,7 @@ exports.handler = async () => {
         budgetType: 'COST',
         timeUnit: 'MONTHLY',
         budgetLimit: { amount: 5, unit: 'USD' },
+        costTypes: { includeCredit: false, includeRefund: false },
       },
       notificationsWithSubscribers: [notif('ACTUAL', 20), notif('ACTUAL', 100), notif('FORECASTED', 100)],
     });

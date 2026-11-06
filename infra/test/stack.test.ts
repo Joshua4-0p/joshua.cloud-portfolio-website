@@ -3,7 +3,7 @@ import { App } from 'aws-cdk-lib';
 import { Template, Match } from 'aws-cdk-lib/assertions';
 import { TalkingDrumStack } from '../lib/talking-drum-stack';
 
-const app = new App({ context: { siteUrl: 'https://example.com' } });
+const app = new App({ context: { siteUrl: 'https://example.com', opsEmail: 'ops@example.com', budgetEmail: 'budget@example.com' } });
 const t = Template.fromStack(new TalkingDrumStack(app, 'T', { env: { region: 'us-east-1', account: '123456789012' } }));
 
 describe('TalkingDrumStack', () => {
@@ -38,8 +38,11 @@ describe('TalkingDrumStack', () => {
       LifecycleConfiguration: { Rules: [Match.objectLike({ ExpirationInDays: 7, Status: 'Enabled' })] },
     });
   });
-  it('two alarms to ops-alerts, notBreaching', () => {
-    t.resourceCountIs('AWS::CloudWatch::Alarm', 2);
+  it('three alarms to ops-alerts, notBreaching', () => {
+    t.resourceCountIs('AWS::CloudWatch::Alarm', 3);
+    t.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      MetricName: '5xx', Namespace: 'AWS/ApiGateway', Threshold: 1, Period: 300, ComparisonOperator: 'GreaterThanOrEqualToThreshold', TreatMissingData: 'notBreaching',
+    });
     t.hasResourceProperties('AWS::CloudWatch::Alarm', {
       MetricName: 'SuccessPercent', Threshold: 100, ComparisonOperator: 'LessThanThreshold', EvaluationPeriods: 1, TreatMissingData: 'notBreaching',
       AlarmActions: Match.anyValue(),
@@ -50,7 +53,7 @@ describe('TalkingDrumStack', () => {
   });
   it('budget $5 monthly with 3 notifications to budget email', () => {
     t.hasResourceProperties('AWS::Budgets::Budget', {
-      Budget: Match.objectLike({ BudgetType: 'COST', TimeUnit: 'MONTHLY', BudgetLimit: { Amount: 5, Unit: 'USD' } }),
+      Budget: Match.objectLike({ CostTypes: Match.objectLike({ IncludeCredit: false, IncludeRefund: false }), BudgetType: 'COST', TimeUnit: 'MONTHLY', BudgetLimit: { Amount: 5, Unit: 'USD' } }),
       NotificationsWithSubscribers: [
         Match.objectLike({ Notification: Match.objectLike({ NotificationType: 'ACTUAL', Threshold: 20 }), Subscribers: [{ SubscriptionType: 'EMAIL', Address: 'budget@example.com' }] }),
         Match.objectLike({ Notification: Match.objectLike({ NotificationType: 'ACTUAL', Threshold: 100 }) }),
@@ -66,12 +69,24 @@ describe('TalkingDrumStack', () => {
   });
   it('cors origins, log retention, table retained, queue policy scoped to topic', () => {
     t.hasResourceProperties('AWS::ApiGatewayV2::Api', {
-      CorsConfiguration: Match.objectLike({ AllowOrigins: ['https://example.com', 'http://localhost:3000', 'http://localhost:4321'] }),
+      CorsConfiguration: Match.objectLike({ AllowOrigins: ['https://example.com', 'http://localhost:3000', 'http://localhost:4321'], MaxAge: 7200 }),
     });
     t.hasResourceProperties('AWS::Logs::LogGroup', { RetentionInDays: 14 });
     t.hasResource('AWS::DynamoDB::Table', { DeletionPolicy: 'Retain' });
     t.hasResourceProperties('AWS::SQS::QueuePolicy', {
       PolicyDocument: { Statement: [Match.objectLike({ Condition: { ArnEquals: { 'aws:SourceArn': Match.anyValue() } } })] },
     });
+  });
+  it('only the drum-telegraph email subscription is filtered to email=yes', () => {
+    const subs = Object.values(t.findResources('AWS::SNS::Subscription')) as any[];
+    const email = subs.find((x) => x.Properties.Endpoint === 'josuefotseu02@gmail.com');
+    expect(email.Properties.FilterPolicy).toEqual({ email: ['yes'] });
+    expect(subs.filter((x) => x.Properties.FilterPolicy)).toHaveLength(1);
+    expect(subs.find((x) => x.Properties.Protocol === 'sqs').Properties.FilterPolicy).toBeUndefined();
+  });
+  it('requires opsEmail and budgetEmail context', () => {
+    const mk = (context: any) => () => new TalkingDrumStack(new App({ context }), 'X');
+    expect(mk({ siteUrl: 'https://e.com', budgetEmail: 'b@example.com' })).toThrow(/opsEmail/);
+    expect(mk({ siteUrl: 'https://e.com', opsEmail: 'o@example.com' })).toThrow(/budgetEmail/);
   });
 });

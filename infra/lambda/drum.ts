@@ -3,7 +3,7 @@ import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
-interface Deps { ddb: DynamoDBDocumentClient; sns: SNSClient; tableName: string; topicArn: string }
+interface Deps { ddb: DynamoDBDocumentClient; sns: SNSClient; tableName: string; topicArn: string; now?: () => number }
 
 const json = (statusCode: number, body: unknown): APIGatewayProxyResultV2 => ({
   statusCode,
@@ -12,7 +12,7 @@ const json = (statusCode: number, body: unknown): APIGatewayProxyResultV2 => ({
 });
 const invalid = () => json(400, { error: 'invalid phrase' });
 
-export function makeHandler({ ddb, sns, tableName, topicArn }: Deps) {
+export function makeHandler({ ddb, sns, tableName, topicArn, now = Date.now }: Deps) {
   return async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
       const route = `${event.requestContext.http.method} ${event.requestContext.http.path}`;
@@ -30,21 +30,27 @@ export function makeHandler({ ddb, sns, tableName, topicArn }: Deps) {
       try { phrase = JSON.parse(body)?.phrase; } catch { return invalid(); }
       if (typeof phrase !== 'string' || !/^[LH]{4}$/.test(phrase)) return invalid();
 
-      const { Attributes } = await ddb.send(new UpdateCommand({
+      // One UpdateItem: bump count, stamp the minute, read the old item to decide whether to email (max 1/min).
+      const minute = Math.floor(now() / 60000);
+      const { Attributes: old } = await ddb.send(new UpdateCommand({
         TableName: tableName,
         Key: { pk: 'drums' },
-        UpdateExpression: 'ADD #c :one',
-        ExpressionAttributeNames: { '#c': 'count' },
-        ExpressionAttributeValues: { ':one': 1 },
-        ReturnValues: 'UPDATED_NEW',
+        UpdateExpression: 'ADD #c :one SET #m = :m',
+        ExpressionAttributeNames: { '#c': 'count', '#m': 'minute' },
+        ExpressionAttributeValues: { ':one': 1, ':m': minute },
+        ReturnValues: 'ALL_OLD',
       }));
-      const count = Attributes?.count;
+      const count = (old?.count ?? 0) + 1;
+      const email = old?.minute === minute ? 'no' : 'yes';
       const notation = [...phrase].map((c) => (c === 'L' ? '●' : '○')).join('');
       const { MessageId } = await sns.send(new PublishCommand({
         TopicArn: topicArn,
         Subject: 'Someone just drummed at you',
         Message: `Someone just drummed at you: ${notation} (rhythm #${count})`,
-        MessageAttributes: { phrase: { DataType: 'String', StringValue: phrase } },
+        MessageAttributes: {
+          phrase: { DataType: 'String', StringValue: phrase },
+          email: { DataType: 'String', StringValue: email },
+        },
       }));
       return json(200, { count, messageId: MessageId });
     } catch (err) {

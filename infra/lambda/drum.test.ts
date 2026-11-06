@@ -9,13 +9,14 @@ const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const sns = new SNSClient({});
 const ddbMock = mockClient(ddb);
 const snsMock = mockClient(sns);
-const handler = makeHandler({ ddb, sns, tableName: 't', topicArn: 'arn:topic' });
+let now = 120_000; // minute 2
+const handler = makeHandler({ ddb, sns, tableName: 't', topicArn: 'arn:topic', now: () => now });
 
 const ev = (method: string, path: string, body?: string, isBase64Encoded = false) =>
   ({ routeKey: `${method} ${path}`, requestContext: { http: { method, path } }, body, isBase64Encoded }) as any;
 const post = (body?: string, b64 = false) => handler(ev('POST', '/drum', b64 && body ? Buffer.from(body).toString('base64') : body, b64)) as Promise<any>;
 
-beforeEach(() => { ddbMock.reset(); snsMock.reset(); });
+beforeEach(() => { ddbMock.reset(); snsMock.reset(); now = 120_000; });
 
 describe('drum handler', () => {
   it('GET returns count 0 when item missing', async () => {
@@ -27,7 +28,7 @@ describe('drum handler', () => {
   });
 
   it('POST LLHL increments, publishes ●●○●, returns count and messageId', async () => {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: { count: 7 } });
+    ddbMock.on(UpdateCommand).resolves({ Attributes: { count: 6, minute: 1 } });
     snsMock.on(PublishCommand).resolves({ MessageId: 'm-1' });
     const r = await post('{"phrase":"LLHL"}');
     expect(r.statusCode).toBe(200);
@@ -37,6 +38,26 @@ describe('drum handler', () => {
     expect(input.Message).toContain('#7');
     expect(input.Subject).toBe('Someone just drummed at you');
     expect(input.MessageAttributes!.phrase.StringValue).toBe('LLHL');
+    expect(input.MessageAttributes!.email.StringValue).toBe('yes');
+  });
+
+  it('email attribute is no within the same minute, yes in a new minute, and first drum is #1', async () => {
+    snsMock.on(PublishCommand).resolves({ MessageId: 'm' });
+    const emailAttr = async (old: any) => {
+      snsMock.resetHistory();
+      ddbMock.on(UpdateCommand).resolves(old);
+      const r = await post('{"phrase":"LLHL"}');
+      expect(r.statusCode).toBe(200);
+      return { r: JSON.parse(r.body), a: snsMock.commandCalls(PublishCommand)[0].args[0].input.MessageAttributes!.email.StringValue };
+    };
+    expect((await emailAttr({ Attributes: { count: 3, minute: 2 } })).a).toBe('no');
+    expect((await emailAttr({ Attributes: { count: 3, minute: 1 } })).a).toBe('yes');
+    const first = await emailAttr({});
+    expect(first.a).toBe('yes');
+    expect(first.r.count).toBe(1);
+    const call = ddbMock.commandCalls(UpdateCommand)[0].args[0].input;
+    expect(call.ReturnValues).toBe('ALL_OLD');
+    expect(call.ExpressionAttributeValues).toMatchObject({ ':one': 1, ':m': 2 });
   });
 
   it('rejects an oversized base64 body before decoding it', async () => {
@@ -49,7 +70,7 @@ describe('drum handler', () => {
   });
 
   it('accepts a base64-encoded valid body', async () => {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: { count: 2 } });
+    ddbMock.on(UpdateCommand).resolves({ Attributes: { count: 1 } });
     snsMock.on(PublishCommand).resolves({ MessageId: 'm-2' });
     const r = await post('{"phrase":"LLHL"}', true);
     expect(r.statusCode).toBe(200);
