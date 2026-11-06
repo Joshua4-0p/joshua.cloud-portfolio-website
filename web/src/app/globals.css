@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0B0B0C;
+  --bone: #F2EDE4;
+  --copper: #C8743C;
+  --copper-hi: #E8A06A;
+  --ash: #8A8580;
+  --signal: #4FD1C5;
+  /* text-safe variants for bone backgrounds (≥ 4.5:1 on --bone) */
+  --ash-deep: #5C5751;
+  --copper-deep: #8F4A1C;
+  --rule: rgb(242 237 228 / 0.18);
+  --emblem-bg: var(--ink);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-bone: var(--bone);
+  --color-copper: var(--copper);
+  --color-copper-hi: var(--copper-hi);
+  --color-ash: var(--ash);
+  --color-signal: var(--signal);
+  --color-ash-deep: var(--ash-deep);
+  --color-copper-deep: var(--copper-deep);
+  --font-display: var(--font-anton), "Arial Narrow", sans-serif;
+  --font-body: var(--font-inter-tight), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--font-body);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+::selection { background: var(--copper); color: var(--ink); }
+
+:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; border-radius: 2px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* Bone (light) sections */
+.section-bone { background: var(--bone); color: var(--ink); --rule: rgb(11 11 12 / 0.2); --emblem-bg: var(--bone); }
+.section-bone :focus-visible { outline-color: var(--copper-deep); }
+
+.font-display { letter-spacing: -0.01em; line-height: 0.88; text-transform: uppercase; }
+.rule { border-color: var(--rule); }
+
+/* Hero marquee */
+.marquee-track { display: flex; width: max-content; animation: marquee 38s linear infinite; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* Hint pulse: one ring every 8 s */
+.pulse-ring::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  border: 2px solid var(--copper); opacity: 0; animation: pulse 8s ease-out infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  14% { transform: scale(1.18, 1.5); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Community photos: black-and-white, copper duotone on hover */
+.duotone { filter: grayscale(1) contrast(1.05); transition: filter 0.5s ease; }
+.duotone:hover, .duotone:focus-within { filter: grayscale(0.2) sepia(0.55) saturate(1.4) hue-rotate(-12deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+  }
+  .marquee-track { animation: none; }
+  .pulse-ring::after { display: none; }
+}

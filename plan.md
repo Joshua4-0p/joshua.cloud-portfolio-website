@@ -49,7 +49,7 @@ ID number, date of birth, phone / WhatsApp numbers, home address, CGPA, the orig
 More learning projects (one line, no card): Microfinance customer segmentation with K-means (Python, Nov 2024 – Feb 2025); Behaviour-Driven Development with Cucumber (Nov 2024 – Feb 2025).
 
 ## Achievements & certifications
-- **AWS Certified Cloud Practitioner** — Amazon Web Services, issued Oct 2026 (expires Oct 2029). Credential link: none yet — show without a link.
+- **AWS Certified Cloud Practitioner** — Amazon Web Services, issued Oct 2026 (expires Oct 2029). Credly badge (owner-supplied 6 Nov): https://www.credly.com/badges/b7d15f04-a22c-493a-8009-329815d638e9
 - 3rd place — Dev War, Hustlers Community (time-limited coding competition).
 - Huawei — 5G Basics (31 May 2025): https://www.credly.com/badges/47b51132-394c-49cf-93b6-74631061a79a/public_url
 - Huawei — Development and Basic Concepts of Cloud Computing (6 Jun 2025): https://www.credly.com/badges/2dfc4b74-def6-41ba-ab25-15400b04c638
