@@ -2,12 +2,12 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { DRUM_MESSAGES } from '@/content/site';
 import { enterStage, exitStage, hit, initialState, type Decoded, type DrumState, type Tone } from '@/lib/drum-engine';
-import { emitDecoded, emitDelivered, emitHit, onDelivered } from '@/lib/drum-bus';
+import { emitDecoded, emitDelivered, emitHit, onDelivered, onRequestHit } from '@/lib/drum-bus';
 import { getCount, sendPhrase } from '@/lib/telegraph';
-import { loadDecoded, loadSound, saveDecoded, hasSoundPref } from '@/lib/storage';
+import { loadDecoded, saveDecoded } from '@/lib/storage';
 import { audio } from '@/lib/audio';
-import SoundPill, { useRestoreSound } from '../SoundPill';
-import SlitDrumSvg from '../SlitDrumSvg';
+import SoundPill, { soundOnFirstHit, useRestoreSound } from '../SoundPill';
+import DrumCanvas from '../three/DrumCanvas';
 import Pads from './Pads';
 import MessageCard from './MessageCard';
 import MessageList from './MessageList';
@@ -86,7 +86,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
       window.clearTimeout(hitTimers.current[tone]);
       hitTimers.current[tone] = window.setTimeout(() => pad.classList.remove('is-hit'), 180);
     }
-    if (!audio.isOn() && !audio.wasChosen() && (!hasSoundPref() || loadSound())) audio.setOn(true); // the first hit is the gesture that turns sound on (or back on, if remembered)
+    soundOnFirstHit();
     audio.drum(tone);
     emitHit(tone);
 
@@ -108,6 +108,8 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
       void sendPhrase(d.phrase).then((res) => { if (res) emitDelivered({ seq, ...res }); });
     }
   }, [commit]);
+
+  useEffect(() => onRequestHit(onHit), [onHit]); // 3D lip clicks take the exact pad path
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') { exit(); return; }
@@ -139,7 +141,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
           </div>
 
           <div className="text-center lg:col-span-7">
-            <SlitDrumSvg className="drum-visual mx-auto h-auto w-full max-w-[560px]" />
+            <DrumCanvas variant="stage" className="mx-auto w-full max-w-[760px]" />
 
             <Pads onHit={onHit} padRefs={padRefs} />
 

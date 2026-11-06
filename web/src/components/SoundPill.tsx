@@ -1,7 +1,12 @@
 'use client';
 import { useEffect, useSyncExternalStore } from 'react';
 import { audio } from '@/lib/audio';
-import { loadSound, saveSound } from '@/lib/storage';
+import { hasSoundPref, loadSound, saveSound } from '@/lib/storage';
+
+/** The first drum hit is the gesture that turns sound on (or back on, if remembered) — never over an explicit choice. */
+export function soundOnFirstHit() {
+  if (!audio.isOn() && !audio.wasChosen() && (!hasSoundPref() || loadSound())) audio.setOn(true);
+}
 
 const useSoundOn = () => useSyncExternalStore(audio.subscribe, audio.isOn, () => false);
 

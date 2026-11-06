@@ -173,3 +173,9 @@ html[data-stage="on"] .drum-stage {
   .marquee-track { animation: none; }
   .pulse-ring::after { display: none; }
 }
+
+/* 3D drum box: edges fade into the section so the canvas (and its poster) never reads as a rectangle. */
+.drum-canvas {
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+}

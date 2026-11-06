@@ -6,7 +6,7 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const patterns = [
-  /(?:\+?237[\s-]?)?6\d{8}/,
+  /(?<![\d.])(?:\+?237[\s-]?)?6\d{8}(?!\d)/, // not inside longer digit runs / float constants (minified three.js)
   /\b\d{2}\/\d{2}\/(19|20)\d{2}\b/,
   /CGPA/i,
   /date of birth|place of birth|whatsapp\s*(?:number|no\b|n°|:|\+|\d)/i, // drum message 8 names the WhatsApp group (not a number)
