@@ -1,0 +1,162 @@
+'use client';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { DRUM_MESSAGES } from '@/content/site';
+import { enterStage, exitStage, hit, initialState, revealAll, type Decoded, type DrumState, type Tone } from '@/lib/drum-engine';
+import { emitDecoded, emitHit } from '@/lib/drum-bus';
+import { loadDecoded, saveDecoded, hasSoundPref } from '@/lib/storage';
+import { audio } from '@/lib/audio';
+import SoundPill, { useRestoreSound } from '../SoundPill';
+import SlitDrumSvg from '../SlitDrumSvg';
+import Pads from './Pads';
+import MessageCard from './MessageCard';
+import MessageList from './MessageList';
+import { AllMessages, DrumHeading } from './DrumIntro';
+
+const TOTAL = DRUM_MESSAGES.length;
+const noop = () => () => {};
+
+export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 'normal' | 'stage' }) {
+  const [state, setState] = useState<DrumState>(() => initialState());
+  const stateRef = useRef(state);
+  const [card, setCard] = useState<{ d: Decoded; key: number } | null>(null);
+  const [announce, setAnnounce] = useState('');
+  const [showList, setShowList] = useState(false);
+  const padRefs = useRef<Record<Tone, HTMLButtonElement | null>>({ L: null, H: null });
+  const hitTimers = useRef<Record<Tone, number>>({ L: 0, H: 0 });
+  const soundSupported = useSyncExternalStore(noop, audio.isSupported, () => true);
+  useRestoreSound();
+
+  const commit = useCallback((s: DrumState) => { stateRef.current = s; setState(s); }, []);
+
+  // After hydration: restore progress from storage and apply ?mode= deep links.
+  useEffect(() => {
+    const mode = new URLSearchParams(location.search).get('mode') ?? (initialMode === 'stage' ? 'stage' : null);
+    let s = initialState(loadDecoded());
+    if (mode === 'stage') s = revealAll(s);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage/URL, which only exist after hydration
+    commit(s);
+    if (mode === 'stage' || mode === 'drum') requestAnimationFrame(() => document.getElementById('drum')?.scrollIntoView({ behavior: 'instant' }));
+  }, [commit, initialMode]);
+
+  // Stage Mode lives on <html> so the whole page can warm up.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (state.stage) html.dataset.stage = 'on';
+    else delete html.dataset.stage;
+  }, [state.stage]);
+
+  const exit = useCallback(() => { if (stateRef.current.stage) commit(exitStage(stateRef.current)); }, [commit]);
+
+  // Any nav link leaves Stage Mode.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => { if ((e.target as Element).closest?.('[data-nav-link]')) exit(); };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, [exit]);
+
+  const onHit = useCallback((tone: Tone) => {
+    const pad = padRefs.current[tone];
+    if (pad) {
+      pad.classList.remove('is-hit');
+      void pad.offsetWidth; // restart the hit animation in the same frame
+      pad.classList.add('is-hit');
+      window.clearTimeout(hitTimers.current[tone]);
+      hitTimers.current[tone] = window.setTimeout(() => pad.classList.remove('is-hit'), 180);
+    }
+    if (!audio.isOn() && !audio.wasChosen() && !hasSoundPref()) audio.setOn(true); // the first hit is the gesture that turns sound on
+    audio.drum(tone);
+    emitHit(tone);
+
+    const r = hit(stateRef.current, tone, performance.now());
+    commit(r.state);
+    if (r.decoded) {
+      const d = r.decoded;
+      saveDecoded(r.state.decoded);
+      setCard((c) => ({ d, key: (c?.key ?? 0) + 1 }));
+      setAnnounce(`Message ${d.index + 1} of ${TOTAL}: ${DRUM_MESSAGES[d.index]}`);
+      audio.chime();
+      emitDecoded(d);
+    }
+  }, [commit]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { exit(); return; }
+    if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    if ((e.target as HTMLElement).closest('input, textarea, select, [contenteditable="true"]')) return;
+    const k = e.key.toLowerCase();
+    if (k === 'f' || k === 'j') { e.preventDefault(); onHit(k === 'f' ? 'L' : 'H'); }
+  };
+
+  const shown = state.stage ? [...Array(TOTAL).keys()] : state.decoded;
+
+  return (
+    <section id="drum" aria-labelledby="drum-title" onKeyDown={onKeyDown} className="drum-stage relative overflow-hidden px-5 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-[1600px]">
+        <div className="grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <DrumHeading />
+            <noscript>
+              <p className="mt-6 max-w-xl text-[15px] text-bone/80">The drum needs JavaScript to play. All eight messages are listed below as text.</p>
+            </noscript>
+            <p className="mt-6 hidden max-w-md font-mono text-xs leading-relaxed text-ash md:block">
+              Tap the pads, or focus the drum and press F (low) and J (high). Four beats make a phrase.
+            </p>
+          </div>
+
+          <div className="text-center lg:col-span-7">
+            <SlitDrumSvg className="drum-visual mx-auto h-auto w-full max-w-[560px]" />
+
+            <Pads onHit={onHit} padRefs={padRefs} />
+
+            <div className="mt-8 flex flex-col items-center gap-2">
+              <p className="font-mono text-[11px] tracking-[0.25em] text-ash">BEATS</p>
+              <p className="relative flex h-8 w-[8.25rem] items-center gap-3 text-2xl leading-none text-copper-hi">
+                <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center gap-3">
+                  {[0, 1, 2, 3].map((i) => (
+                    <span key={i} className={`h-6 w-6 shrink-0 rounded-full border border-dashed border-bone/25 ${i < state.phrase.length ? 'opacity-0' : ''}`} />
+                  ))}
+                </span>
+                <span data-testid="notation" className="relative flex gap-3 tracking-normal">
+                  {state.phrase.map((t, i) => <span key={i} className="w-6 text-center">{t === 'L' ? '●' : '○'}</span>)}
+                </span>
+              </p>
+              <p className="font-mono text-sm text-bone">{state.decoded.length} / {TOTAL} messages decoded</p>
+            </div>
+
+            <div aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
+
+            <div className="mt-8 min-h-8">
+              {card && <MessageCard key={card.key} decoded={card.d} first={card.d.index === 0} />}
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                aria-expanded={showList}
+                aria-controls="drum-message-list"
+                onClick={() => setShowList((v) => !v)}
+                className="rounded-full border border-bone/30 px-5 py-2.5 text-sm transition-colors hover:border-copper hover:text-copper-hi"
+              >
+                {showList ? 'Hide the messages' : 'Read the messages'}
+              </button>
+              {state.stageUnlocked && !state.stage && (
+                <button type="button" onClick={() => commit(enterStage(stateRef.current))} className="rounded-full bg-copper px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-copper-hi">
+                  Enter Stage Mode
+                </button>
+              )}
+              {state.stage && (
+                <button type="button" onClick={exit} className="rounded-full bg-bone px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-copper-hi">
+                  ✕ Back to the quiet site
+                </button>
+              )}
+            </div>
+            <p className="mt-5 flex justify-center font-mono text-xs text-ash"><SoundPill variant="inline" /></p>
+            {!soundSupported && <p className="mt-4 font-mono text-xs text-ash">Sound not supported in this browser — the drum still works silently.</p>}
+            {showList && <MessageList id="drum-message-list" indices={shown} />}
+          </div>
+        </div>
+        <AllMessages />
+      </div>
+    </section>
+  );
+}

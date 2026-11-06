@@ -117,46 +117,27 @@ export default function Work() {
         </div>
         <p className="mt-2 font-mono text-xs tracking-[0.2em] text-ash">RECENT WORK — SELECT A PROJECT FOR THE CASE STUDY</p>
 
+        {/* One DOM, two layouts. The default layout is decided by CSS (grid < 1024px, list ≥ 1024px) so nothing shifts on hydration; the toggle sets data-view. */}
         <ul
+          data-view={chosen ?? undefined}
           onPointerMove={onMove}
           onPointerLeave={() => setHovered(null)}
-          className={view === 'list' ? 'mt-10 border-t rule' : 'mt-10 grid gap-5 sm:grid-cols-2'}
+          className="work mt-10"
         >
-          {projects.map((p, i) =>
-            view === 'list' ? (
-              <li key={p.slug} id={`project-${p.slug}`} className="border-b rule" onPointerEnter={(e) => canPreview(e) && setHovered(i)}>
-                <details className="group">
-                  <summary className="grid cursor-pointer list-none grid-cols-1 items-center gap-3 py-8 transition-[padding] duration-300 hover:pl-4 md:grid-cols-[1fr_auto] md:py-10 [&::-webkit-details-marker]:hidden">
-                    <h3 className="font-display text-[clamp(38px,5.4vw,88px)] text-bone/85 transition-colors group-hover:text-bone group-open:text-copper-hi">
-                      {p.name}
-                      {p.learning && <LearningBadge />}
-                    </h3>
-                    <span className="font-mono text-xs leading-relaxed text-ash md:text-right">
-                      {p.tags.join(' & ')}
-                      <br />
-                      {p.period}
-                    </span>
-                  </summary>
-                  <CaseStudy p={p} />
-                </details>
-              </li>
-            ) : (
-              <li key={p.slug} id={`project-${p.slug}`} className="rounded-[1.6rem] bg-[#121214] p-3 ring-1 ring-bone/5 sm:[&:has(details[open])]:col-span-2">
-                <details className="group">
-                  <summary className="block cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                    <span className="block overflow-hidden rounded-[1.2rem] transition-transform duration-500 group-hover:scale-[0.99]">
-                      <ProjectCover project={p} index={i} />
-                    </span>
-                    <span className="flex items-baseline justify-between gap-4 px-2 pb-1 pt-4">
-                      <h3 className="text-xl font-medium">{p.name}{p.learning && <LearningBadge />}</h3>
-                      <span className="shrink-0 font-mono text-xs text-ash">{p.period}</span>
-                    </span>
-                  </summary>
-                  <div className="px-2 pt-4"><CaseStudy p={p} /></div>
-                </details>
-              </li>
-            ),
-          )}
+          {projects.map((p, i) => (
+            <li key={p.slug} id={`project-${p.slug}`} className="w-item" onPointerEnter={(e) => canPreview(e) && setHovered(i)}>
+              <details className="group">
+                <summary className="w-summary block cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <span className="w-cover"><ProjectCover project={p} index={i} /></span>
+                  <span className="w-head">
+                    <h3 className="w-name">{p.name}{p.learning && <LearningBadge />}</h3>
+                    <span className="w-meta"><span className="w-tags">{p.tags.join(' & ')}<br /></span>{p.period}</span>
+                  </span>
+                </summary>
+                <div className="w-body"><CaseStudy p={p} /></div>
+              </details>
+            </li>
+          ))}
         </ul>
 
         <p className="mt-10 max-w-3xl text-sm leading-relaxed text-ash">
