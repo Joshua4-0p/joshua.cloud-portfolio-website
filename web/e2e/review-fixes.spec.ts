@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { test, expect, blockApi } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 
 // Phase-1 review fixes. Motion is ON here (default context), which is where SplitText runs.
@@ -19,7 +19,7 @@ test('About lead sentence is exposed to assistive tech with motion on', async ({
 });
 
 test('a pad tap (re)activates audio inside a click, not only pointerdown (iOS unlock)', async ({ browser }) => {
-  const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+  const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } }); await blockApi(ctx);
   const page = await ctx.newPage();
   await page.addInitScript(() => {
     const w = window as unknown as { __audioEvents: string[] };

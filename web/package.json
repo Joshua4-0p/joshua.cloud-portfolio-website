@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "e2e": "playwright test",
+    "build:e2e": "node scripts/build-e2e.mjs",
+    "e2e": "npm run build:e2e && playwright test",
     "pii": "node scripts/check-pii.mjs",
     "images": "node scripts/export-images.mjs",
     "preview": "serve out -l 4321"

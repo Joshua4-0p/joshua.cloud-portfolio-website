@@ -1,7 +1,7 @@
-import { test, expect } from './fixtures';
+import { test, expect, blockApi } from './fixtures';
 
 test('every section is in static HTML (JS disabled)', async ({ browser }) => {
-  const ctx = await browser.newContext({ javaScriptEnabled: false }); const page = await ctx.newPage();
+  const ctx = await browser.newContext({ javaScriptEnabled: false }); await blockApi(ctx); const page = await ctx.newPage();
   await page.goto('/');
   for (const id of ['hero','about','superpowers','work','achievements','community','drum','contact'])
     await expect(page.locator(`section#${id} h2, section#${id} h1`).first()).toBeVisible();

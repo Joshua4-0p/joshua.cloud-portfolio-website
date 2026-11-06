@@ -38,7 +38,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
 
   useEffect(() => {
     let live = true;
-    getCount().then((n) => { if (live && n !== null) setTotal((t) => t ?? n); });
+    getCount().then((n) => { if (live && n !== null) setTotal((t) => Math.max(t ?? 0, n)); });
     const off = onDelivered((d) => { setDelivery((m) => ({ ...m, [d.seq]: d })); setTotal((t) => Math.max(t ?? 0, d.count)); });
     return () => { live = false; off(); };
   }, []);

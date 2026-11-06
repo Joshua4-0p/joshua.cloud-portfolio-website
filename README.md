@@ -38,7 +38,7 @@ Next.js (App Router, `output: 'export'`) · TypeScript · Tailwind CSS v4 · GSA
 ```bash
 cd web && npm ci && npm run dev          # http://localhost:3000 (set NEXT_PUBLIC_DRUM_API=<API URL, no trailing slash> to enable the telegraph; read at build time)
 npm test                                  # unit tests (Vitest)
-npm run build && npx playwright install chromium && npm run e2e   # static export + end-to-end tests
+npx playwright install chromium && npm run e2e   # builds against a fake API host, then end-to-end tests (never touches the real API)
 cd ../infra && npm ci && npx cdk deploy -c siteUrl=<your Amplify URL>   # backend
 ```
 

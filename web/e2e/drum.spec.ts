@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { test, expect, blockApi } from './fixtures';
 
 test('first message within one phrase, keyboard + pointer', async ({ page }) => {
   await page.goto('/#drum');
@@ -26,7 +26,7 @@ test('?mode=stage shows all 8 and exits with Esc', async ({ page }) => {
 
 // Extra coverage for Review Focus 1, 3, 4.
 test('a touch tap counts once (pointerdown + click)', async ({ browser }) => {
-  const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+  const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } }); await blockApi(ctx);
   const page = await ctx.newPage(); await page.goto('/#drum');
   await page.getByRole('button', { name: 'Low drum' }).tap();
   await expect(page.getByTestId('notation')).toHaveText('●');
