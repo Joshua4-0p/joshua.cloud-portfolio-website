@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mockClient } from 'aws-sdk-client-mock';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
@@ -39,10 +39,13 @@ describe('drum handler', () => {
     expect(input.MessageAttributes!.phrase.StringValue).toBe('LLHL');
   });
 
-  it('rejects an obviously oversized raw body before decoding', async () => {
-    const r = await post('x'.repeat(401));
+  it('rejects an oversized base64 body before decoding it', async () => {
+    const spy = vi.spyOn(Buffer, 'from');
+    const r = await handler(ev('POST', '/drum', 'A'.repeat(401), true)) as any;
+    const decoded = spy.mock.calls.some((c) => c[1] === 'base64');
+    spy.mockRestore();
     expect(r.statusCode).toBe(400);
-    expect(JSON.parse(r.body)).toEqual({ error: 'invalid phrase' });
+    expect(decoded).toBe(false);
   });
 
   it('accepts a base64-encoded valid body', async () => {
