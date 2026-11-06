@@ -39,6 +39,12 @@ describe('drum handler', () => {
     expect(input.MessageAttributes!.phrase.StringValue).toBe('LLHL');
   });
 
+  it('rejects an obviously oversized raw body before decoding', async () => {
+    const r = await post('x'.repeat(401));
+    expect(r.statusCode).toBe(400);
+    expect(JSON.parse(r.body)).toEqual({ error: 'invalid phrase' });
+  });
+
   it('accepts a base64-encoded valid body', async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: { count: 2 } });
     snsMock.on(PublishCommand).resolves({ MessageId: 'm-2' });

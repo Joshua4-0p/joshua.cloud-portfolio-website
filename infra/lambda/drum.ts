@@ -23,6 +23,7 @@ export function makeHandler({ ddb, sns, tableName, topicArn }: Deps) {
       if (route !== 'POST /drum') return json(404, { error: 'not found' });
 
       const raw = event.body ?? '';
+      if (raw.length > 400) return invalid();
       const body = event.isBase64Encoded ? Buffer.from(raw, 'base64').toString('utf8') : raw;
       if (Buffer.byteLength(body) > 200) return invalid();
       let phrase: unknown;
