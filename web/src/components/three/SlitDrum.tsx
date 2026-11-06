@@ -119,6 +119,7 @@ export default function SlitDrum({ variant }: { variant: Variant }) {
   });
 
   const hover = (on: boolean) => () => { document.body.style.cursor = on ? 'pointer' : ''; };
+  useEffect(() => () => { document.body.style.cursor = ''; }, []); // unmounting under a hovered lip must not leave the pointer
 
   return (
     <group>

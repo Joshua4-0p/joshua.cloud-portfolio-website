@@ -3,15 +3,24 @@
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import assert from 'node:assert/strict';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const patterns = [
-  /(?<![\d.])(?:\+?237[\s-]?)?6\d{8}(?!\d)/, // not inside longer digit runs / float constants (minified three.js)
+  // Cameroon mobile. Not inside a longer digit run, and not after a float's dot ("0.6…" / "*.6…" in minified three.js),
+  // but a dot after a letter ("Tel.6…") still counts: JS can't have letter-dot-digit, so that's prose.
+  /(?<!\d)(?<!(?:^|[^A-Za-z])\.)(?:(?:\+|00)?237[\s-]?)?6\d{8}(?!\d)/,
   /\b\d{2}\/\d{2}\/(19|20)\d{2}\b/,
   /CGPA/i,
   /date of birth|place of birth|whatsapp\s*(?:number|no\b|n°|:|\+|\d)/i, // drum message 8 names the WhatsApp group (not a number)
   /\b[A-Z0-9]{18,}\b/,
 ];
+// Self-check of the phone pattern: fails loudly if an edit makes it miss a number or flag a float.
+for (const t of ['00237677123456', '+237 677123456', '+237677123456', '677123456', 'Tel.677123456', '"677123456"'])
+  assert.match(t, patterns[0], `phone pattern misses ${t}`);
+for (const t of ['0.677123456', 'x*.677123456', '.677123456', '1.00237677123456', '9677123456', '6771234567'])
+  assert.doesNotMatch(t, patterns[0], `phone pattern flags non-phone ${t}`);
+
 const local = path.join(root, '.pii-local.txt');
 const exact = existsSync(local)
   ? readFileSync(local, 'utf8').split(/\r?\n/).map(s => s.trim()).filter(Boolean)

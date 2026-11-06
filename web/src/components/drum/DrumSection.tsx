@@ -6,7 +6,8 @@ import { emitDecoded, emitDelivered, emitHit, onDelivered, onRequestHit } from '
 import { getCount, sendPhrase } from '@/lib/telegraph';
 import { loadDecoded, saveDecoded } from '@/lib/storage';
 import { audio } from '@/lib/audio';
-import SoundPill, { soundOnFirstHit, useRestoreSound } from '../SoundPill';
+import { Rhythms } from '../LiveCounter';
+import SoundPill, { soundOnFirstHit, useRestoreSound, useSoundOn } from '../SoundPill';
 import DrumCanvas from '../three/DrumCanvas';
 import Pads from './Pads';
 import MessageCard from './MessageCard';
@@ -37,6 +38,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   useEffect(() => () => window.clearTimeout(idleTimer.current), []);
   const soundSupported = useSyncExternalStore(noop, audio.isSupported, () => true);
   useRestoreSound();
+  const soundOn = useSoundOn();
 
   useEffect(() => {
     let live = true;
@@ -69,6 +71,13 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     if (stageAnnounced.current) { stageAnnounced.current = false; return; } // the secret phrase already announced both
     setAnnounce(state.stage ? 'Stage Mode on — all 8 messages are in "Read the messages".' : 'Stage Mode off.');
   }, [state.stage]);
+
+  // Stage Mode groove: plays while in stage with sound on; follows the sound toggle both ways.
+  useEffect(() => {
+    if (!state.stage || !soundOn) return;
+    audio.startClave();
+    return () => audio.stopClave();
+  }, [state.stage, soundOn]);
 
   const exit = useCallback(() => {
     if (!stateRef.current.stage) return;
@@ -175,7 +184,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
 
             <div className="mt-8 min-h-8">
               {card && <MessageCard key={card.key} decoded={card.d} first={card.d.index === 0} delivery={delivery[card.key] ? <Delivery {...delivery[card.key]} /> : undefined} />}
-              {total !== null && <p className="mt-4 font-mono text-xs text-signal">{total} rhythms have crossed the cloud</p>}
+              {total !== null && <p className="mt-4 font-mono text-xs text-signal"><Rhythms n={total} /></p>}
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

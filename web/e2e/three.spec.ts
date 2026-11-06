@@ -5,6 +5,11 @@ const POSTER = 'img[src="/images/drum-poster.webp"]';
 // The default fixture pins the poster path (see fixtures.ts); these tests opt back in to the real gate.
 const open3D = async (browser: Browser, opts = {}) => {
   const ctx = await browser.newContext(opts); await blockApi(ctx, { with3D: true });
+  // Pin a capable device so a 2-core / low-memory runner doesn't silently turn these into poster tests.
+  await ctx.addInitScript(() => {
+    Object.defineProperty(Navigator.prototype, 'hardwareConcurrency', { get: () => 8 });
+    Object.defineProperty(Navigator.prototype, 'deviceMemory', { get: () => 8 });
+  });
   return { ctx, page: await ctx.newPage() };
 };
 
@@ -19,7 +24,11 @@ test('reduced motion: posters only, no WebGL canvas', async ({ browser }) => {
   await ctx.close();
 });
 
+// The two tests below are the motion-on path by definition; under the reduced-motion project the first test covers 3D.
+const skipReduced = () => test.skip(test.info().project.use.reducedMotion === 'reduce', 'motion-on path only');
+
 test('default: the 3D drum mounts over the poster within 5 s, hidden from assistive tech', async ({ browser }) => {
+  skipReduced();
   const { ctx, page } = await open3D(browser);
   await page.goto('/');
   await expect(page.locator('#hero canvas')).toBeAttached({ timeout: 5000 });
@@ -30,6 +39,7 @@ test('default: the 3D drum mounts over the poster within 5 s, hidden from assist
 });
 
 test('with the 3D drum running, a phrase still decodes', async ({ browser }) => {
+  skipReduced();
   const { ctx, page } = await open3D(browser);
   await page.goto('/#drum');
   await expect(page.locator('#drum canvas')).toBeAttached({ timeout: 5000 });

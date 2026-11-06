@@ -8,7 +8,7 @@ export function soundOnFirstHit() {
   if (!audio.isOn() && !audio.wasChosen() && (!hasSoundPref() || loadSound())) audio.setOn(true);
 }
 
-const useSoundOn = () => useSyncExternalStore(audio.subscribe, audio.isOn, () => false);
+export const useSoundOn = () => useSyncExternalStore(audio.subscribe, audio.isOn, () => false);
 
 /** Restores a remembered "sound on" choice. The AudioContext itself is only created on the next gesture. */
 export function useRestoreSound() {
@@ -26,8 +26,34 @@ export function useRestoreSound() {
   }, []);
 }
 
+/**
+ * Interface sounds, delegated once for every link/button/summary: a quiet tick on mouse hover, a soft tap on click,
+ * the "water" swell on nav links. Pads are excluded from the tap (they play the drum). All no-ops while sound is off.
+ */
+const UI = 'a[href], button, summary';
+function useUiSounds(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    const ui = (e: Event) => (e.target as Element | null)?.closest?.(UI);
+    const over = (e: PointerEvent) => {
+      const el = ui(e);
+      if (e.pointerType === 'mouse' && el && !el.contains(e.relatedTarget as Node | null)) audio.hover();
+    };
+    const click = (e: MouseEvent) => {
+      const el = ui(e);
+      if (!el || el.matches('.drum-pad')) return;
+      if (el.matches('[data-nav-link]')) audio.swell();
+      else audio.click();
+    };
+    document.addEventListener('pointerover', over);
+    document.addEventListener('click', click);
+    return () => { document.removeEventListener('pointerover', over); document.removeEventListener('click', click); };
+  }, [enabled]);
+}
+
 export default function SoundPill({ variant = 'floating' }: { variant?: 'floating' | 'inline' }) {
   const on = useSoundOn();
+  useUiSounds(variant === 'floating'); // the floating pill is mounted once per page, so it owns the delegated listener
   const toggle = () => { const next = !audio.isOn(); audio.setOn(next, true); saveSound(next); };
   const bars = (
     <span aria-hidden="true" className="flex h-3.5 items-end gap-[3px]">
