@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 610" role="img" aria-label="Architecture: a GitHub push triggers Amplify CI/CD, which deploys the static site to AWS Amplify Hosting on CloudFront for the visitor's browser. When the visitor plays a drum phrase, the browser calls an Amazon API Gateway HTTP API, which invokes an AWS Lambda function that adds one to a counter in Amazon DynamoDB and publishes to the Amazon SNS topic drum-telegraph, which fans out to two subscribers: an email inbox and the Amazon SQS queue village-archive. An hourly Amazon CloudWatch Synthetics canary checks the site; CloudWatch alarms on the canary and on Lambda errors notify the SNS topic ops-alerts by email. AWS Budgets sends cost alerts at 1 and 5 US dollars." font-family="JetBrains Mono, ui-monospace, Menlo, monospace">
+  <defs>
+    <marker id="a-cu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#C8743C"/></marker>
+    <marker id="a-sg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4FD1C5"/></marker>
+    <style>
+      .b{fill:#141416;stroke:#C8743C;stroke-width:1.5}
+      .bs{fill:#0f1a19;stroke:#4FD1C5;stroke-width:1.5}
+      .t{fill:#F2EDE4;font-size:15px;font-weight:600}
+      .s{fill:#A9A49E;font-size:12px}
+      .l{fill:none;stroke:#C8743C;stroke-width:1.6}
+      .ls{fill:none;stroke:#4FD1C5;stroke-width:2}
+      .d{stroke-dasharray:6 5}
+      .lab{fill:#A9A49E;font-size:11px}
+      .h{fill:#E8A06A;font-size:11px;letter-spacing:2px}
+    </style>
+  </defs>
+  <rect width="1240" height="610" rx="24" fill="#0B0B0C"/>
+  <text x="30" y="34" class="h">DEPLOY</text>
+  <text x="30" y="250" class="h">TELEGRAPH</text>
+  <text x="30" y="478" class="h">MONITORING &amp; COST</text>
+
+  <!-- deploy lane -->
+  <rect x="290" y="55" width="220" height="70" rx="12" class="b"/><text x="304" y="85" class="t">AWS Amplify Hosting</text><text x="304" y="106" class="s">CloudFront CDN · headers</text>
+  <rect x="570" y="55" width="200" height="70" rx="12" class="b"/><text x="584" y="85" class="t">Amplify CI/CD</text><text x="584" y="106" class="s">build on every push</text>
+  <rect x="830" y="55" width="180" height="70" rx="12" class="b"/><text x="844" y="85" class="t">GitHub repo</text><text x="844" y="106" class="s">web/ + infra/ (CDK)</text>
+  <path d="M830 90H776" class="l" marker-end="url(#a-cu)"/>
+  <path d="M570 90H516" class="l" marker-end="url(#a-cu)"/>
+  <path d="M330 125V200H180V262" class="l" marker-end="url(#a-cu)"/><text x="190" y="192" class="lab">static HTML, CSS, JS</text>
+
+  <!-- telegraph lane -->
+  <rect x="30" y="268" width="180" height="74" rx="12" class="b"/><text x="44" y="298" class="t">Visitor's browser</text><text x="44" y="319" class="s">plays ● ○ ● ○</text>
+  <rect x="290" y="270" width="220" height="70" rx="12" class="bs"/><text x="304" y="300" class="t">Amazon API Gateway</text><text x="304" y="321" class="s">HTTP API · /drum</text>
+  <rect x="570" y="270" width="200" height="70" rx="12" class="bs"/><text x="584" y="300" class="t">AWS Lambda</text><text x="584" y="321" class="s">Node.js 22 · arm64</text>
+  <rect x="830" y="190" width="180" height="70" rx="12" class="bs"/><text x="844" y="220" class="t">Amazon DynamoDB</text><text x="844" y="241" class="s">rhythm counter</text>
+  <rect x="830" y="330" width="180" height="70" rx="12" class="bs"/><text x="844" y="360" class="t">Amazon SNS</text><text x="844" y="381" class="s">drum-telegraph</text>
+  <rect x="1060" y="290" width="160" height="58" rx="12" class="bs"/><text x="1074" y="315" class="t">Email</text><text x="1074" y="335" class="s">Josue's inbox</text>
+  <rect x="1060" y="380" width="160" height="58" rx="12" class="bs"/><text x="1074" y="405" class="t">Amazon SQS</text><text x="1074" y="425" class="s">village-archive</text>
+  <path d="M210 305H284" class="ls" marker-end="url(#a-sg)"/><text x="222" y="296" class="lab">POST</text>
+  <path d="M510 305H564" class="ls" marker-end="url(#a-sg)"/>
+  <path d="M770 295H800V225H824" class="ls" marker-end="url(#a-sg)"/><text x="776" y="210" class="lab">ADD 1</text>
+  <path d="M770 315H800V365H824" class="ls" marker-end="url(#a-sg)"/><text x="776" y="390" class="lab">publish</text>
+  <path d="M1010 355H1035V319H1054" class="ls" marker-end="url(#a-sg)"/>
+  <path d="M1010 375H1035V409H1054" class="ls" marker-end="url(#a-sg)"/><text x="1020" y="462" class="lab">fan-out: 2 subscribers</text>
+
+  <!-- monitoring lane -->
+  <rect x="290" y="500" width="220" height="70" rx="12" class="b"/><text x="304" y="530" class="t">CloudWatch Synthetics</text><text x="304" y="551" class="s">hourly canary</text>
+  <rect x="570" y="500" width="200" height="70" rx="12" class="b"/><text x="584" y="530" class="t">CloudWatch alarms</text><text x="584" y="551" class="s">canary · Lambda errors</text>
+  <rect x="830" y="500" width="180" height="70" rx="12" class="b"/><text x="844" y="530" class="t">Amazon SNS</text><text x="844" y="551" class="s">ops-alerts</text>
+  <rect x="1060" y="506" width="160" height="58" rx="12" class="b"/><text x="1074" y="531" class="t">Email</text><text x="1074" y="551" class="s">ops alerts</text>
+  <rect x="30" y="500" width="180" height="70" rx="12" class="b"/><text x="44" y="530" class="t">AWS Budgets</text><text x="44" y="551" class="s">$1 / $5 alerts</text>
+  <path d="M290 520H262V96H284" class="l d" marker-end="url(#a-cu)"/><text x="140" y="440" class="lab">checks the site</text>
+  <path d="M510 535H564" class="l" marker-end="url(#a-cu)"/>
+  <path d="M670 340V494" class="l d" marker-end="url(#a-cu)"/><text x="678" y="440" class="lab">errors ≥ 1</text>
+  <path d="M770 535H824" class="l" marker-end="url(#a-cu)"/>
+  <path d="M1010 535H1054" class="l" marker-end="url(#a-cu)"/>
+</svg>
