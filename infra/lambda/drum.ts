@@ -52,7 +52,7 @@ export function makeHandler({ ddb, sns, tableName, topicArn, now = Date.now }: D
           email: { DataType: 'String', StringValue: email },
         },
       }));
-      return json(200, { count, messageId: MessageId });
+      return json(200, { count, messageId: MessageId, emailed: email === 'yes' });
     } catch (err) {
       console.error(err);
       return json(500, { error: 'internal' });

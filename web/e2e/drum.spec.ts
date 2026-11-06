@@ -22,6 +22,7 @@ test('?mode=stage shows all 8 and exits with Esc', async ({ page }) => {
   await expect(page.getByTestId('message-list').locator('li')).toHaveCount(8);
   await page.getByRole('button', { name: 'Low drum' }).focus(); await page.keyboard.press('Escape');
   await expect(page.locator('html')).not.toHaveAttribute('data-stage', 'on');
+  expect(page.url()).not.toContain('mode=');
 });
 
 // Extra coverage for Review Focus 1, 3, 4.

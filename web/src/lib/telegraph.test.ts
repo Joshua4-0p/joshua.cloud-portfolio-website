@@ -5,14 +5,18 @@ const base = 'https://api.example.com';
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status });
 
 describe('sendPhrase', () => {
-  it('parses {count,messageId} and posts JSON', async () => {
-    const f = vi.fn().mockResolvedValue(json({ count: 42, messageId: 'abcd1234' }));
-    expect(await sendPhrase('LLHL', { base, fetchImpl: f })).toEqual({ count: 42, messageId: 'abcd1234' });
+  it('parses {count,messageId,emailed} and posts JSON', async () => {
+    const f = vi.fn().mockResolvedValue(json({ count: 42, messageId: 'abcd1234', emailed: true }));
+    expect(await sendPhrase('LLHL', { base, fetchImpl: f })).toEqual({ count: 42, messageId: 'abcd1234', emailed: true });
     const [url, init] = f.mock.calls[0];
     expect(url).toBe(`${base}/drum`);
     expect(init.method).toBe('POST');
     expect(init.body).toBe('{"phrase":"LLHL"}');
     expect(init.headers['content-type']).toBe('application/json');
+  });
+  it('emailed is false when missing or not exactly true', async () => {
+    expect((await sendPhrase('LLHL', { base, fetchImpl: async () => json({ count: 1, messageId: 'm' }) }))?.emailed).toBe(false);
+    expect((await sendPhrase('LLHL', { base, fetchImpl: async () => json({ count: 1, messageId: 'm', emailed: 'yes' }) }))?.emailed).toBe(false);
   });
   it('returns null on timeout', async () => {
     const f = vi.fn((_u: string, init: RequestInit) => new Promise((_r, rej) => init.signal!.addEventListener('abort', () => rej(new Error('abort')))));

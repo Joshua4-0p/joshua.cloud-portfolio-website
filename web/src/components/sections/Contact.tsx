@@ -24,10 +24,10 @@ export default function Contact() {
         </h2>
 
         <div className="relative mt-12 border-t rule pt-12">
-          <MagneticButton href={`mailto:${profile.email}`} className="absolute -top-20 right-4 h-36 w-36 bg-copper text-base font-medium text-ink md:-top-24 md:right-24 md:h-48 md:w-48 md:text-lg">
+          <MagneticButton href={`mailto:${profile.email}`} className="mb-8 ml-auto h-36 w-36 bg-copper text-base font-medium text-ink md:h-48 md:w-48 md:text-lg lg:absolute lg:-top-11 lg:right-24 lg:mb-0">
             Get in touch
           </MagneticButton>
-          <ul className="flex flex-wrap gap-3 pt-16 md:pt-4">
+          <ul className="flex flex-wrap gap-3 lg:pt-4">
             {pills.map((p) => (
               <li key={p.href}>
                 <a href={p.href} className="inline-block rounded-full border border-bone/30 px-6 py-4 text-[15px] transition-colors hover:border-copper hover:bg-copper hover:text-ink"

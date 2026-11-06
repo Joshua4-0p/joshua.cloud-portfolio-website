@@ -38,7 +38,7 @@ export default function SoundPill({ variant = 'floating' }: { variant?: 'floatin
   );
   if (variant === 'inline')
     return (
-      <button type="button" aria-pressed={on} data-sound-toggle onClick={toggle} className="inline-flex items-center gap-2 hover:text-copper-hi">
+      <button type="button" aria-pressed={on} data-sound-toggle onClick={toggle} className="inline-flex min-h-11 items-center gap-2 hover:text-copper-hi">
         {bars} Sound <span aria-hidden="true">{on ? 'on' : 'off'}</span>
       </button>
     );

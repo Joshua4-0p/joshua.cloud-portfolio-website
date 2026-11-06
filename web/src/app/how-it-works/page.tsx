@@ -21,10 +21,10 @@ const diagram = readFileSync(path.join(process.cwd(), 'public/architecture.svg')
 // monitoring are deployed in Phase 2 of the build plan, before submission.
 const services: [string, string, string][] = [
   ['AWS Amplify Hosting', 'Builds every push from GitHub and serves the static site through CloudFront, with security headers.', '~$0'],
-  ['Amazon API Gateway', 'HTTP API with GET /drum and POST /drum, throttled to 2 requests/s (burst 10), CORS locked to this site.', '~$0'],
+  ['Amazon API Gateway', 'HTTP API with GET /drum and POST /drum, throttled to 2 requests/s (burst 10), CORS limited to this site (plus localhost for development).', '~$0'],
   ['AWS Lambda', 'Node.js 22 on arm64, 128 MB: validates the phrase, counts it, publishes it.', '~$0 (free tier)'],
   ['Amazon DynamoDB', 'On-demand table holding the "rhythms have crossed the cloud" counter.', '~$0'],
-  ['Amazon SNS', 'Topic drum-telegraph fans each phrase out to two subscribers; topic ops-alerts carries alarms.', '~$0'],
+  ['Amazon SNS', 'Topic drum-telegraph archives every phrase in SQS and emails me at most once a minute (a subscription filter policy); topic ops-alerts carries alarms.', '~$0'],
   ['Amazon SQS', 'Queue village-archive: the second subscriber, keeps every phrase for 4 days (encrypted).', '~$0'],
   ['Amazon CloudWatch Synthetics', 'Hourly canary opens the live site and checks the drum hint is there.', '~$0.74'],
   ['AWS Budgets', 'Monthly cost budget with alerts at $1 and $5.', '$0'],
@@ -67,7 +67,7 @@ export default function HowItWorks() {
           <div className="overflow-x-auto rounded-3xl" dangerouslySetInnerHTML={{ __html: diagram }} />
           <ol className="mt-8 grid gap-4 text-[15px] leading-relaxed text-bone/85 md:grid-cols-3">
             <li><span className="font-mono text-xs text-copper-hi">01 DEPLOY — </span>Every push to GitHub triggers Amplify CI/CD, which exports static HTML, runs a personal-data check and publishes it on CloudFront.</li>
-            <li><span className="font-mono text-xs text-signal">02 A PHRASE — </span>Four beats are POSTed as <code className="font-mono">{'{"phrase":"LLHL"}'}</code>. Lambda checks it against <code className="font-mono">^[LH]{'{4}'}$</code>, adds 1 in DynamoDB and publishes to SNS, which delivers to email and SQS.</li>
+            <li><span className="font-mono text-xs text-signal">02 A PHRASE — </span>Four beats are POSTed as <code className="font-mono">{'{"phrase":"LLHL"}'}</code>. Lambda checks it against <code className="font-mono">^[LH]{'{4}'}$</code>, adds 1 in DynamoDB and publishes to SNS, which archives every rhythm in SQS and emails me at most once a minute.</li>
             <li><span className="font-mono text-xs text-copper-hi">03 WATCH — </span>A canary opens the site every hour. Alarms on the canary and on Lambda errors email me through a second SNS topic. Budgets warn at $1 and $5.</li>
           </ol>
           <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-bone/70">
@@ -108,7 +108,7 @@ export default function HowItWorks() {
                 ))}
               </ul>
               <p className="mt-6 text-[15px] leading-relaxed text-bone/75">
-                Least-privilege IAM via CDK grants (the function can only update its table and publish to its topic). Inputs longer
+                Least-privilege IAM via CDK grants (the function can only read and update its table and publish to its topic). Inputs longer
                 than 200 bytes or not matching the phrase pattern are rejected before anything is written.
               </p>
             </div>

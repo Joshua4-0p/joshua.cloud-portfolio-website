@@ -39,7 +39,7 @@ body {
 }
 ::selection { background: var(--copper); color: var(--ink); }
 
-:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; border-radius: 2px; }
+:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

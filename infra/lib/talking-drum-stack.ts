@@ -71,6 +71,10 @@ export class TalkingDrumStack extends cdk.Stack {
       throttlingRateLimit: 2,
       throttlingBurstLimit: 10,
     };
+    // Reads are cheap; give GET its own, higher limit (POST and default stay 2/10).
+    (api.defaultStage!.node.defaultChild as apigw.CfnStage).routeSettings = {
+      'GET /drum': { ThrottlingRateLimit: 20, ThrottlingBurstLimit: 50 },
+    };
 
     // Monitoring
     const ops = new sns.Topic(this, 'OpsAlerts', { topicName: 'ops-alerts' });

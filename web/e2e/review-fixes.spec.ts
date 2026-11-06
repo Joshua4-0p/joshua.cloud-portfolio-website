@@ -92,3 +92,37 @@ test('remembered sound-on is audible on the first pad hit', async ({ page }) => 
   await page.getByRole('button', { name: 'Low drum' }).click();
   expect(await page.evaluate(() => (window as unknown as { __osc: number }).__osc)).toBeGreaterThan(0);
 });
+
+// Re-audit fixes.
+test('contact button never overlaps the title at any width', async ({ page }) => {
+  for (const width of [360, 390, 768, 1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/#contact');
+    const h = await page.locator('#contact-title').boundingBox(), b = await page.getByRole('link', { name: 'Get in touch' }).boundingBox();
+    expect(h && b, `boxes at ${width}`).toBeTruthy();
+    const overlap = h!.x < b!.x + b!.width && b!.x < h!.x + h!.width && h!.y < b!.y + b!.height && b!.y < h!.y + h!.height;
+    expect(overlap, `overlap at ${width}`).toBe(false);
+  }
+});
+test('keyboard focus keeps the round pad radius', async ({ page }) => {
+  await page.goto('/#drum');
+  const low = page.getByRole('button', { name: 'Low drum' });
+  await page.keyboard.press('Tab'); await low.focus(); await page.keyboard.press('Shift+Tab'); await page.keyboard.press('Tab');
+  await expect(low).toBeFocused();
+  const radius = await low.evaluate((el) => getComputedStyle(el).borderRadius);
+  expect(radius).not.toBe('2px');
+  expect(parseFloat(radius)).toBeGreaterThan(20);
+});
+test('a lone beat clears from the notation after the 2 s idle reset', async ({ page }) => {
+  await page.goto('/#drum');
+  await page.getByRole('button', { name: 'Low drum' }).click();
+  await expect(page.getByTestId('notation')).toHaveText('●');
+  await page.waitForTimeout(2300);
+  await expect(page.getByTestId('notation')).toHaveText('');
+});
+test('small tap targets are at least 44px tall', async ({ page }) => {
+  await page.goto('/#drum');
+  const h = async (l: import('@playwright/test').Locator) => (await l.boundingBox())!.height;
+  expect(await h(page.locator('#drum [data-sound-toggle]'))).toBeGreaterThanOrEqual(44);
+  expect(await h(page.locator('summary', { hasText: 'ALL 8 MESSAGES' }))).toBeGreaterThanOrEqual(44);
+});

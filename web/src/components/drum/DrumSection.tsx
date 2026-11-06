@@ -33,6 +33,8 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   const fromUrl = useRef(false);
   const prevStage = useRef(false);
   const hitTimers = useRef<Record<Tone, number>>({ L: 0, H: 0 });
+  const idleTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(idleTimer.current), []);
   const soundSupported = useSyncExternalStore(noop, audio.isSupported, () => true);
   useRestoreSound();
 
@@ -68,7 +70,11 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     setAnnounce(state.stage ? 'Stage Mode on — all 8 messages are in "Read the messages".' : 'Stage Mode off.');
   }, [state.stage]);
 
-  const exit = useCallback(() => { if (stateRef.current.stage) commit(exitStage(stateRef.current)); }, [commit]);
+  const exit = useCallback(() => {
+    if (!stateRef.current.stage) return;
+    commit(exitStage(stateRef.current));
+    if (new URLSearchParams(location.search).has('mode')) history.replaceState(null, '', location.pathname + location.hash);
+  }, [commit]);
 
   // Any nav link leaves Stage Mode.
   useEffect(() => {
@@ -93,6 +99,11 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     const wasStage = stateRef.current.stage;
     const r = hit(stateRef.current, tone, performance.now());
     commit(r.state);
+    // Clear a stale partial phrase once the engine's 2 s idle reset would drop it anyway (display only).
+    window.clearTimeout(idleTimer.current);
+    idleTimer.current = window.setTimeout(() => {
+      if (stateRef.current.phrase.length) commit({ ...stateRef.current, phrase: [] });
+    }, 2000);
     if (r.decoded) {
       const d = r.decoded;
       saveDecoded(r.state.decoded);

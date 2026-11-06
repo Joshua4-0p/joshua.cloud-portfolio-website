@@ -18,9 +18,9 @@ async function call(path: string, init: RequestInit, o: Opts): Promise<Record<st
   }
 }
 
-export async function sendPhrase(phrase: string, o: Opts = {}): Promise<{ count: number; messageId: string } | null> {
+export async function sendPhrase(phrase: string, o: Opts = {}): Promise<{ count: number; messageId: string; emailed: boolean } | null> {
   const b = await call('/drum', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ phrase }) }, o);
-  return b && typeof b.count === 'number' && typeof b.messageId === 'string' ? { count: b.count, messageId: b.messageId } : null;
+  return b && typeof b.count === 'number' && typeof b.messageId === 'string' ? { count: b.count, messageId: b.messageId, emailed: b.emailed === true } : null;
 }
 
 export async function getCount(o: Opts = {}): Promise<number | null> {

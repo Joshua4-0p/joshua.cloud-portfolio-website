@@ -20,7 +20,7 @@ export function DrumHeading() {
 export function AllMessages() {
   return (
     <details className="mt-8 max-w-3xl rounded-2xl border border-bone/15 px-5 py-4">
-      <summary className="cursor-pointer font-mono text-xs tracking-[0.2em] text-bone/80">ALL 8 MESSAGES (TEXT VERSION)</summary>
+      <summary className="-my-4 flex min-h-11 cursor-pointer items-center font-mono text-xs tracking-[0.2em] text-bone/80">ALL 8 MESSAGES (TEXT VERSION)</summary>
       <ol className="mt-4 list-decimal space-y-2 pl-6 text-[15px] leading-relaxed text-bone/85">
         {DRUM_MESSAGES.map((m) => <li key={m}>{m}</li>)}
       </ol>

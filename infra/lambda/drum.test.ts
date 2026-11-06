@@ -32,7 +32,7 @@ describe('drum handler', () => {
     snsMock.on(PublishCommand).resolves({ MessageId: 'm-1' });
     const r = await post('{"phrase":"LLHL"}');
     expect(r.statusCode).toBe(200);
-    expect(JSON.parse(r.body)).toEqual({ count: 7, messageId: 'm-1' });
+    expect(JSON.parse(r.body)).toEqual({ count: 7, messageId: 'm-1', emailed: true });
     const input = snsMock.commandCalls(PublishCommand)[0].args[0].input;
     expect(input.Message).toContain('●●○●');
     expect(input.Message).toContain('#7');
@@ -50,10 +50,13 @@ describe('drum handler', () => {
       expect(r.statusCode).toBe(200);
       return { r: JSON.parse(r.body), a: snsMock.commandCalls(PublishCommand)[0].args[0].input.MessageAttributes!.email.StringValue };
     };
-    expect((await emailAttr({ Attributes: { count: 3, minute: 2 } })).a).toBe('no');
+    const same = await emailAttr({ Attributes: { count: 3, minute: 2 } });
+    expect(same.a).toBe('no');
+    expect(same.r.emailed).toBe(false);
     expect((await emailAttr({ Attributes: { count: 3, minute: 1 } })).a).toBe('yes');
     const first = await emailAttr({});
     expect(first.a).toBe('yes');
+    expect(first.r.emailed).toBe(true);
     expect(first.r.count).toBe(1);
     const call = ddbMock.commandCalls(UpdateCommand)[0].args[0].input;
     expect(call.ReturnValues).toBe('ALL_OLD');
@@ -74,7 +77,7 @@ describe('drum handler', () => {
     snsMock.on(PublishCommand).resolves({ MessageId: 'm-2' });
     const r = await post('{"phrase":"LLHL"}', true);
     expect(r.statusCode).toBe(200);
-    expect(JSON.parse(r.body)).toEqual({ count: 2, messageId: 'm-2' });
+    expect(JSON.parse(r.body)).toEqual({ count: 2, messageId: 'm-2', emailed: true });
   });
 
   it.each(['not json', '{}', '{"phrase":"llhl"}', '{"phrase":"LLHLL"}', '{"phrase":"LXHL"}', 'x'.repeat(10000), undefined])(

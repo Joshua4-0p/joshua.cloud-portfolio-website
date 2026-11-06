@@ -26,6 +26,11 @@ describe('TalkingDrumStack', () => {
       DefaultRouteSettings: { ThrottlingRateLimit: 2, ThrottlingBurstLimit: 10 },
     });
   });
+  it('GET /drum throttles 20/50', () => {
+    t.hasResourceProperties('AWS::ApiGatewayV2::Stage', {
+      RouteSettings: { 'GET /drum': { ThrottlingRateLimit: 20, ThrottlingBurstLimit: 50 } },
+    });
+  });
   it('ops-alerts topic emails the ops address', () => {
     t.resourceCountIs('AWS::SNS::Topic', 2);
     t.hasResourceProperties('AWS::SNS::Topic', { TopicName: 'ops-alerts' });

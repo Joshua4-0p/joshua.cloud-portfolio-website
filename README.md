@@ -6,7 +6,7 @@ Portfolio of **Tiaya Fotseu Josue** — Cloud & DevOps Engineer · Serverless De
 
 ## The one creative feature: The Talking Drum
 
-A two-tone slit drum, inspired by the talking-drum and slit-drum traditions of Cameroon and West & Central Africa. Play four beats (low ● / high ○) and the drum answers with one of eight messages about me. Each phrase is also published through a real AWS messaging system: API Gateway → Lambda → DynamoDB + SNS, fanned out to email and an SQS queue. Drummer = publisher, rhythm = message, villages = subscribers.
+A two-tone slit drum, inspired by the talking-drum and slit-drum traditions of Cameroon and West & Central Africa. Play four beats (low ● / high ○) and the drum answers with one of eight messages about me. Each phrase is also published through a real AWS messaging system: API Gateway → Lambda → DynamoDB + SNS, fanned out to an SQS queue (every rhythm is archived) and email (at most one a minute, via an SNS subscription filter policy). Drummer = publisher, rhythm = message, villages = subscribers.
 
 - Mouse, touch and keyboard (focus the drum, press **F** low / **J** high). Pads are real buttons.
 - Sound is synthesised with the Web Audio API (no audio files), off until you tap.
@@ -22,7 +22,7 @@ A two-tone slit drum, inspired by the talking-drum and slit-drum traditions of C
 | Amazon API Gateway (HTTP API) | `GET /drum` (counter) and `POST /drum` (phrase), throttled 2 rps / burst 10 | ~$0 |
 | AWS Lambda (Node.js 22, arm64) | Validates `^[LH]{4}$`, increments the counter, publishes to SNS | ~$0 |
 | Amazon DynamoDB (on-demand) | "Rhythms have crossed the cloud" counter | ~$0 |
-| Amazon SNS | `drum-telegraph` fan-out (email + SQS); `ops-alerts` for alarms | ~$0 |
+| Amazon SNS | `drum-telegraph` fan-out (SQS archive + email, max 1/min); `ops-alerts` for alarms | ~$0 |
 | Amazon SQS | `village-archive` subscriber queue | ~$0 |
 | Amazon CloudWatch Synthetics | Hourly canary on the live site | ~$0.74 |
 | AWS Budgets | $1 / $5 monthly cost alerts | $0 |
