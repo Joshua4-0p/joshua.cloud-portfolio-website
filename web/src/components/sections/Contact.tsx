@@ -33,6 +33,7 @@ export default function Contact() {
                 <a href={p.href} className="inline-block rounded-full border border-bone/30 px-6 py-4 text-[15px] transition-colors hover:border-copper hover:bg-copper hover:text-ink"
                   {...(p.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                   {p.label}
+                  {p.href.startsWith('http') && <span className="sr-only">(opens in a new tab)</span>}
                 </a>
               </li>
             ))}

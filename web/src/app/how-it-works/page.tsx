@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { profile } from '@/content/site';
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
   title: 'How this site is built — Tiaya Fotseu Josue',
   description: 'Architecture of the Talking Drum portfolio: Next.js static export on AWS Amplify Hosting, and a Drum Telegraph on API Gateway, Lambda, DynamoDB and SNS, built with AWS CDK.',
   alternates: { canonical: '/how-it-works/' },
+  openGraph: { type: 'website', siteName: 'Josue.cloud', images: [{ url: '/og.png', width: 1200, height: 630 }], url: 'https://main.d2edrxdeaouf1j.amplifyapp.com/how-it-works/', title: 'How this site is built — Tiaya Fotseu Josue' },
 };
 
 // Read at build time and inlined, so the diagram's text is in the HTML. Same file is docs/architecture.svg.
@@ -44,11 +46,11 @@ export default function HowItWorks() {
   return (
     <>
       <header className="px-5 py-6 md:px-10">
-        <a href="/" className="inline-flex items-center gap-2.5 text-bone">
+        <Link href="/" className="inline-flex items-center gap-2.5 text-bone">
           <Emblem className="h-9 w-9 text-copper" />
           <span className="font-mono text-sm tracking-[0.2em]">JOSUE</span>
           <span className="sr-only">— back to the portfolio</span>
-        </a>
+        </Link>
       </header>
       <main id="main" className="px-5 pb-24 md:px-10">
         <div className="mx-auto max-w-[1240px]">
@@ -120,7 +122,7 @@ export default function HowItWorks() {
             </div>
           </div>
 
-          <p className="mt-20"><a href="/#drum" className="font-display text-[clamp(32px,4vw,56px)] text-copper hover:text-copper-hi">← Back to the drum</a></p>
+          <p className="mt-20"><Link href="/#drum" className="font-display text-[clamp(32px,4vw,56px)] text-copper hover:text-copper-hi">← Back to the drum</Link></p>
         </div>
       </main>
       <Footer />

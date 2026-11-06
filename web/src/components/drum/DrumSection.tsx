@@ -1,9 +1,9 @@
 'use client';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { DRUM_MESSAGES } from '@/content/site';
-import { enterStage, exitStage, hit, initialState, revealAll, type Decoded, type DrumState, type Tone } from '@/lib/drum-engine';
+import { enterStage, exitStage, hit, initialState, type Decoded, type DrumState, type Tone } from '@/lib/drum-engine';
 import { emitDecoded, emitHit } from '@/lib/drum-bus';
-import { loadDecoded, saveDecoded, hasSoundPref } from '@/lib/storage';
+import { loadDecoded, loadSound, saveDecoded, hasSoundPref } from '@/lib/storage';
 import { audio } from '@/lib/audio';
 import SoundPill, { useRestoreSound } from '../SoundPill';
 import SlitDrumSvg from '../SlitDrumSvg';
@@ -22,6 +22,8 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   const [announce, setAnnounce] = useState('');
   const [showList, setShowList] = useState(false);
   const padRefs = useRef<Record<Tone, HTMLButtonElement | null>>({ L: null, H: null });
+  const fromUrl = useRef(false);
+  const prevStage = useRef(false);
   const hitTimers = useRef<Record<Tone, number>>({ L: 0, H: 0 });
   const soundSupported = useSyncExternalStore(noop, audio.isSupported, () => true);
   useRestoreSound();
@@ -32,7 +34,8 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   useEffect(() => {
     const mode = new URLSearchParams(location.search).get('mode') ?? (initialMode === 'stage' ? 'stage' : null);
     let s = initialState(loadDecoded());
-    if (mode === 'stage') s = revealAll(s);
+    // Stage from the URL shows all 8 via `shown`; `decoded` stays real so only real decodes are saved.
+    if (mode === 'stage') { s = { ...s, stageUnlocked: true, stage: true }; fromUrl.current = true; }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage/URL, which only exist after hydration
     commit(s);
     if (mode === 'stage' || mode === 'drum') requestAnimationFrame(() => document.getElementById('drum')?.scrollIntoView({ behavior: 'instant' }));
@@ -43,6 +46,11 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     const html = document.documentElement;
     if (state.stage) html.dataset.stage = 'on';
     else delete html.dataset.stage;
+    if (prevStage.current === state.stage) return;
+    prevStage.current = state.stage;
+    if (fromUrl.current) { fromUrl.current = false; return; } // no announcement for the ?mode=stage load
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- announcing a change that came from user input
+    setAnnounce(state.stage ? 'Stage Mode on — all 8 messages are in "Read the messages".' : 'Stage Mode off.');
   }, [state.stage]);
 
   const exit = useCallback(() => { if (stateRef.current.stage) commit(exitStage(stateRef.current)); }, [commit]);
@@ -63,7 +71,7 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
       window.clearTimeout(hitTimers.current[tone]);
       hitTimers.current[tone] = window.setTimeout(() => pad.classList.remove('is-hit'), 180);
     }
-    if (!audio.isOn() && !audio.wasChosen() && !hasSoundPref()) audio.setOn(true); // the first hit is the gesture that turns sound on
+    if (!audio.isOn() && !audio.wasChosen() && (!hasSoundPref() || loadSound())) audio.setOn(true); // the first hit is the gesture that turns sound on (or back on, if remembered)
     audio.drum(tone);
     emitHit(tone);
 
@@ -87,10 +95,15 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
     if (k === 'f' || k === 'j') { e.preventDefault(); onHit(k === 'f' ? 'L' : 'H'); }
   };
 
+  // Keep keyboard focus inside the section after a click, so F/J work (Safari doesn't focus buttons on click).
+  const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
+    if (!e.currentTarget.contains(document.activeElement)) e.currentTarget.focus({ preventScroll: true });
+  };
+
   const shown = state.stage ? [...Array(TOTAL).keys()] : state.decoded;
 
   return (
-    <section id="drum" aria-labelledby="drum-title" onKeyDown={onKeyDown} className="drum-stage relative overflow-hidden px-5 py-24 md:px-10 md:py-32">
+    <section id="drum" tabIndex={-1} aria-labelledby="drum-title" onKeyDown={onKeyDown} onPointerDown={onPointerDown} className="drum-stage outline-none relative overflow-hidden px-5 py-24 md:px-10 md:py-32">
       <div className="relative mx-auto max-w-[1600px]">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
@@ -139,14 +152,14 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
               >
                 {showList ? 'Hide the messages' : 'Read the messages'}
               </button>
-              {state.stageUnlocked && !state.stage && (
-                <button type="button" onClick={() => commit(enterStage(stateRef.current))} className="rounded-full bg-copper px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-copper-hi">
-                  Enter Stage Mode
-                </button>
-              )}
-              {state.stage && (
-                <button type="button" onClick={exit} className="rounded-full bg-bone px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-copper-hi">
-                  ✕ Back to the quiet site
+              {(state.stageUnlocked || state.stage) && (
+                <button
+                  type="button"
+                  aria-pressed={state.stage}
+                  onClick={() => (state.stage ? exit() : commit(enterStage(stateRef.current)))}
+                  className={`rounded-full px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-copper-hi ${state.stage ? 'bg-bone' : 'bg-copper'}`}
+                >
+                  {state.stage ? '✕ Back to the quiet site' : 'Enter Stage Mode'}
                 </button>
               )}
             </div>

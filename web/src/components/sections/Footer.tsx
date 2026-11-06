@@ -8,7 +8,7 @@ export default function Footer({ soundToggle }: { soundToggle?: ReactNode }) {
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-x-8 gap-y-4">
         <p>© 2026 {profile.name}</p>
         <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <li><a className="hover:text-copper-hi" href={profile.links.repo} target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a></li>
+          <li><a className="hover:text-copper-hi" href={profile.links.repo} target="_blank" rel="noopener noreferrer">Source on GitHub ↗<span className="sr-only">(opens in a new tab)</span></a></li>
           <li><a className="hover:text-copper-hi" href="/how-it-works/">How this site is built</a></li>
           <li>Last updated {LAST_UPDATED}</li>
           {soundToggle && <li>{soundToggle}</li>}

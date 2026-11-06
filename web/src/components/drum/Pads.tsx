@@ -26,6 +26,7 @@ export default function Pads({ onHit, padRefs }: { onHit: (t: Tone) => void; pad
           aria-label={p.label}
           aria-keyshortcuts={p.key}
           onPointerDown={(e) => { if (e.pointerType === 'mouse' && e.button !== 0) return; onHit(p.tone); }}
+          onKeyDown={(e) => { if (e.repeat && (e.key === 'Enter' || e.key === ' ')) e.preventDefault(); }}
           onClick={(e) => { audio.unlock(); if (e.detail === 0) onHit(p.tone); }}
           onContextMenu={(e) => e.preventDefault()}
           className={`drum-pad group relative grid touch-none select-none place-items-center rounded-full ring-1 ring-copper/50 ${

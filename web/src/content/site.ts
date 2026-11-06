@@ -265,13 +265,13 @@ export const community: { org: string; role: string; period: string; summary: st
     org: 'Hult Prize at University of Buea',
     role: 'Core organizing team',
     period: 'Oct 2025 – present',
-    summary: 'Organizes the Hult Prize on campus.',
+    summary: 'Core organizing team.',
   },
   {
     org: 'Orange Digital Center Club, Buea',
     role: 'Onsite sessions with AWS Cloud Club UB',
     period: 'Jan 2026',
-    summary: 'Hands-on cloud sessions for students.',
+    summary: 'Onsite sessions with AWS Cloud Club UB.',
   },
 ];
 
@@ -307,7 +307,7 @@ export const photos: { src: string; alt: string; caption: string }[] = [
   { src: '/images/odc-talk-2', alt: 'Josue speaking during an onsite session at Orange Digital Center Club, Buea', caption: 'Onsite session with AWS Cloud Club UB — Jan 2026' },
   { src: '/images/odc-talk-3', alt: 'Josue teaching in the computer lab at Orange Digital Center Club, Buea', caption: 'Teaching at ODC Club, Buea — Jan 2026' },
   { src: '/images/community-day-2026', alt: 'A group of volunteers holding educloud academy T-shirts at AWS Community Day Cameroon 2026, Yaoundé', caption: 'AWS Community Day Cameroon, Yaoundé — 25 Jul 2026' },
-  { src: '/images/community-day-booth', alt: 'Standing between the AWS Community Day Cameroon and AWS User Groups Douala banners at the booth', caption: 'AWS Community Day Cameroon booth — 2026' },
+  { src: '/images/community-day-booth', alt: 'Josue standing between the AWS Community Day Cameroon and AWS User Groups Douala banners at the booth', caption: 'AWS Community Day Cameroon booth — 2026' },
 ];
 
 export const DRUM_MESSAGES: readonly string[] = [
