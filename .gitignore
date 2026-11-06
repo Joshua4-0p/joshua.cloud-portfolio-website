@@ -1,2 +1,16 @@
 # Installed Node.js dependencies (including nested project folders)
 node_modules/
+
+# Never publish: raw photos, third-party reference screenshots & mood board, tool output
+assets/
+docs/design-references/
+.playwright-mcp/
+presentation/build/
+presentation/~$*
+~$*
+
+# Build output
+.next/
+out/
+cdk.out/
+.env*
