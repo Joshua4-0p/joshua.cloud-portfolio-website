@@ -63,8 +63,8 @@ export default function FanOut() {
   const portal = useMemo(() => ({ current: gl.domElement.parentElement! }), [gl]);
   const narrow = useThree((s) => s.size.width) < NARROW;
   const subs = useMemo(() => SUBS.map((s) => ({
-    label: narrow ? s.label.replace(' (', '\n(') : s.label,
-    at: new THREE.Vector3(narrow ? s.x * 0.72 : s.x, narrow ? -0.1 : 0.35, narrow ? -3.2 : -2.4),
+    label: narrow ? s.label.replace(' (', '\n(').replace(' ', '\n') : s.label,
+    at: new THREE.Vector3(narrow ? s.x * 0.9 : s.x, narrow ? 2.05 : 0.35, narrow ? -3.2 : -2.4),
   })), [narrow]);
   const up = useMemo(() => curve(DRUM, TOPIC, 0.6), []);
   const outs = useMemo(() => subs.map((s) => curve(TOPIC, s.at, 0.9)), [subs]);
