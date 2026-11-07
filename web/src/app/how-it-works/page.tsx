@@ -64,7 +64,8 @@ export default function HowItWorks() {
           </p>
 
           <H2>Architecture</H2>
-          <div className="overflow-x-auto rounded-3xl" dangerouslySetInnerHTML={{ __html: diagram }} />
+          {/* Below 720 px the diagram scrolls sideways instead of shrinking its text to ~4 px. */}
+          <div tabIndex={0} role="region" aria-label="Architecture diagram (scrolls sideways)" className="overflow-x-auto rounded-3xl [&>svg]:min-w-[720px]" dangerouslySetInnerHTML={{ __html: diagram }} />
           <ol className="mt-8 grid gap-4 text-[15px] leading-relaxed text-bone/85 md:grid-cols-3">
             <li><span className="font-mono text-xs text-copper-hi">01 DEPLOY — </span>Every push to GitHub triggers Amplify CI/CD, which exports static HTML, runs a personal-data check and publishes it on CloudFront.</li>
             <li><span className="font-mono text-xs text-signal">02 A PHRASE — </span>Four beats are POSTed as <code className="font-mono">{'{"phrase":"LLHL"}'}</code>. Lambda checks it against <code className="font-mono">^[LH]{'{4}'}$</code>, adds 1 in DynamoDB and publishes to SNS, which archives every rhythm in SQS and emails me at most once a minute.</li>
@@ -80,7 +81,7 @@ export default function HowItWorks() {
           </p>
 
           <H2>AWS services</H2>
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="AWS services table (scrolls sideways)" className="overflow-x-auto">
             <table className="w-full min-w-[640px] border-collapse text-left text-[15px]">
               <caption className="sr-only">AWS services used, their purpose and estimated monthly cost</caption>
               <thead className="font-mono text-xs tracking-[0.15em] text-ash">
