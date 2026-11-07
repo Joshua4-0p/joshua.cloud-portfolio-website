@@ -21,7 +21,7 @@ I'm Tiaya Fotseu Josue, a Cloud & DevOps Engineer and Serverless Developer from 
 |---|---|
 | **D1** Public portfolio on AWS at a live URL that stays up through judging | https://main.d2edrxdeaouf1j.amplifyapp.com, hosted on **AWS Amplify Hosting**. An hourly **Amazon CloudWatch Synthetics** canary checks it and alarms if it fails. |
 | **D2** Three core sections: About Me, Skills / Tech Superpowers, Projects or Achievements | Nav links and anchors: [About](https://main.d2edrxdeaouf1j.amplifyapp.com/#about), [Superpowers](https://main.d2edrxdeaouf1j.amplifyapp.com/#superpowers), [Work](https://main.d2edrxdeaouf1j.amplifyapp.com/#work), plus Recognition and Community. Screenshots 02–06. All sections are static HTML and readable without JavaScript. |
-| **D3** One creative feature that does not get in the way of navigation | **The Talking Drum** ([/#drum](https://main.d2edrxdeaouf1j.amplifyapp.com/#drum)). Visible hint in the hero: "The drum has a message for you — tap it". Opt-in, no splash screen, no forced sound, nav always works, Stage Mode exits with one button or Escape. Works with mouse, touch and keyboard. Screenshots 07–09, 11 and the demo GIF. |
+| **D3** One creative feature that does not get in the way of navigation | **The Talking Drum** ([/#drum](https://main.d2edrxdeaouf1j.amplifyapp.com/#drum)). Visible hint in the hero: "The drum has a message for you — tap it". Opt-in, no splash screen, no forced sound, nav always works, Stage Mode exits with one button, any nav link, or Escape while the drum has focus. Works with mouse, touch and keyboard. Screenshots 07–09, 11 and the demo GIF. |
 | **D4** Link to the GitHub repository | https://github.com/Joshua4-0p/joshua.cloud-portfolio-website (public), linked in the site footer and on /how-it-works/. |
 | **D5** Screenshots of the portfolio and the AWS setup, AWS services documented, learnings and challenges | 12 portfolio screenshots, the architecture diagram, a demo GIF, and AWS console screenshots (see "AWS console screenshots" below), each with a caption. Services table with purpose and monthly cost under "Working AWS implementation". "What I learned" and "Challenges I hit" below. |
 | **D6** Original, unpublished website | New repo created on 6 Nov 2026 at 06:24 UTC. New Amplify app, first deployed on 6 Nov 2026. See the originality statement under "Communication quality". |
@@ -53,7 +53,7 @@ The 3D drum shows this fan-out: a pulse travels to the archive, and the inbox li
 - No start screen, no loader, no scroll-jacking. The drum is one section of a normal page.
 - Sound is off until you tap. It is synthesised with the Web Audio API, so there are no audio files.
 - The 3D drum loads lazily. Low-memory devices and reduced-motion users get a static poster instead.
-- Any nav link leaves Stage Mode. So do the "✕ Back to the quiet site" button and the Escape key.
+- Any nav link leaves Stage Mode. So does the "✕ Back to the quiet site" button, and the Escape key while focus is inside the drum section.
 - The pads are real buttons. On a keyboard, focus the drum and press **F** (low) and **J** (high).
 - If the API is down or blocked, the drum still answers instantly. Only the "Delivered" line is missing.
 
@@ -81,7 +81,7 @@ All backend infrastructure is code: **AWS CDK v2** (TypeScript) deploys one **AW
 | AWS service | Purpose in this portfolio | Est. monthly cost |
 |---|---|---|
 | **AWS Amplify Hosting** | Git-connected CI/CD. Every push to `main` builds the Next.js static export and serves it over HTTPS through Amazon CloudFront, with custom security headers. | ~$0 (Free Tier at judging traffic) |
-| **Amazon API Gateway** (HTTP API) | `GET /drum` (counter) and `POST /drum` (phrase). POST is throttled to 2 requests/s, burst 10. CORS allows only the site. | ~$0 |
+| **Amazon API Gateway** (HTTP API) | `GET /drum` (counter) and `POST /drum` (phrase). POST is throttled to 2 requests/s, burst 10. CORS allows only the site's origin (plus localhost for development). | ~$0 |
 | **AWS Lambda** (Node.js 22, arm64, 128 MB) | Validates the phrase, updates the counter, publishes to SNS, returns `emailed`. Bad input gets a 400 and touches nothing. | ~$0 |
 | **Amazon DynamoDB** (on-demand) | The "rhythms have crossed the cloud" counter, and the minute stamp for the email cap. | ~$0 |
 | **Amazon SNS** | `drum-telegraph`: fans each rhythm out to SQS and email (filter policy, max 1 email/min). `ops-alerts`: delivers alarms to me. | ~$0 |
