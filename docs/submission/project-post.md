@@ -4,6 +4,12 @@
 **Try the creative feature:** https://main.d2edrxdeaouf1j.amplifyapp.com/#drum   ·   **Stage Mode:** https://main.d2edrxdeaouf1j.amplifyapp.com/?mode=stage
 **How it's built (on the site):** https://main.d2edrxdeaouf1j.amplifyapp.com/how-it-works/
 
+> **TL;DR.** A two-tone slit drum sits in the middle of my portfolio.
+>
+> Play four beats and a real AWS pipeline (Amazon API Gateway → AWS Lambda → Amazon DynamoDB + Amazon SNS → Amazon SQS and email) delivers the rhythm, and the drum answers with a message about me.
+>
+> Try it: https://main.d2edrxdeaouf1j.amplifyapp.com/#drum
+
 I'm Tiaya Fotseu Josue, a Cloud & DevOps Engineer and Serverless Developer from Buea, Cameroon. I'm a 4th-year B.Eng Computer Engineering student at the University of Buea. I have played the drums since Lower Sixth. This portfolio turns that drum into a real AWS messaging system.
 
 ![Demo: the hint, four drum hits, the message card with "Delivered via Amazon SNS", then Stage Mode](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/demo.gif)
@@ -17,7 +23,7 @@ I'm Tiaya Fotseu Josue, a Cloud & DevOps Engineer and Serverless Developer from 
 | **D2** Three core sections: About Me, Skills / Tech Superpowers, Projects or Achievements | Nav links and anchors: [About](https://main.d2edrxdeaouf1j.amplifyapp.com/#about), [Superpowers](https://main.d2edrxdeaouf1j.amplifyapp.com/#superpowers), [Work](https://main.d2edrxdeaouf1j.amplifyapp.com/#work), plus Recognition and Community. Screenshots 02–06. All sections are static HTML and readable without JavaScript. |
 | **D3** One creative feature that does not get in the way of navigation | **The Talking Drum** ([/#drum](https://main.d2edrxdeaouf1j.amplifyapp.com/#drum)). Visible hint in the hero: "The drum has a message for you — tap it". Opt-in, no splash screen, no forced sound, nav always works, Stage Mode exits with one button or Escape. Works with mouse, touch and keyboard. Screenshots 07–09, 11 and the demo GIF. |
 | **D4** Link to the GitHub repository | https://github.com/Joshua4-0p/joshua.cloud-portfolio-website (public), linked in the site footer and on /how-it-works/. |
-| **D5** Screenshots of the portfolio and the AWS setup, AWS services documented, learnings and challenges | 12 portfolio screenshots, the architecture diagram, a demo GIF, and AWS console screenshots (Amplify, API Gateway, Lambda, DynamoDB, SNS, SQS, CloudWatch Synthetics, Budgets) below, each with a caption. Services table with purpose and monthly cost under "Working AWS implementation". "What I learned" and "Challenges I hit" below. |
+| **D5** Screenshots of the portfolio and the AWS setup, AWS services documented, learnings and challenges | 12 portfolio screenshots, the architecture diagram, a demo GIF, and AWS console screenshots (see "AWS console screenshots" below), each with a caption. Services table with purpose and monthly cost under "Working AWS implementation". "What I learned" and "Challenges I hit" below. |
 | **D6** Original, unpublished website | New repo created on 6 Nov 2026 at 06:24 UTC. New Amplify app, first deployed on 6 Nov 2026. See the originality statement under "Communication quality". |
 
 ## Creativity and memorability
@@ -26,7 +32,7 @@ I'm Tiaya Fotseu Josue, a Cloud & DevOps Engineer and Serverless Developer from 
 
 You play four beats: low ● and high ○. The drum answers with one of eight short messages about me. They are true things from my life: I drew cartoons and manga before I wrote code. My first code was C in Level 200. I grew up bilingual. There are eight to find.
 
-**Why it reflects me.** I am a drummer. I build serverless and messaging systems on AWS. A talking drum was a publish/subscribe system long before the cloud: one drummer sends a rhythm, and every village in earshot receives it. So the punchline on the first card is: *Before SNS, there was the drum. Drummer = publisher, rhythm = message, villages = subscribers.*
+**Why it reflects me.** I am a drummer. I started in Lower Sixth, and guitar came later, in Level 300 at the University of Buea. The first message the drum gives you is mine: "I started drumming in Lower Sixth. Years later I'm still sending messages, now they travel through the cloud." I build serverless and messaging systems on AWS. A talking drum was a publish/subscribe system long before the cloud: one drummer sends a rhythm, and every village in earshot receives it. So the punchline on the first card is: *Before SNS, there was the drum. Drummer = publisher, rhythm = message, villages = subscribers.*
 
 **And the drum really publishes.** Every completed four-beat phrase is sent to a real AWS backend:
 
@@ -52,7 +58,7 @@ The 3D drum shows this fan-out: a pulse travels to the archive, and the inbox li
 - If the API is down or blocked, the drum still answers instantly. Only the "Delivered" line is missing.
 
 ![Hero on desktop with the drum hint above the fold](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/01-hero-desktop.png)
-*01 — Hero on desktop (1440×900). My name, titles, the 3D drum, and the hint "The drum has a message for you — tap it" above the fold.*
+*01 — Hero on desktop (1440×900). My name, titles, the tagline "Before SNS, there was the drum.", the 3D drum, and the hint "The drum has a message for you — tap it" above the fold.*
 
 ![The drum section with two pads and the 3D slit drum](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/07-drum-section.png)
 *07 — The drum section. Two pads (low and high) and the 3D slit drum on a dark stage. The labels show the SNS topic and its two subscribers: my inbox (email) and the village archive (SQS).*
@@ -91,7 +97,7 @@ All backend infrastructure is code: **AWS CDK v2** (TypeScript) deploys one **AW
 
 ### Evidence from the stack (read-only)
 
-Resources in the CloudFormation stack `TalkingDrumStack` (us-east-1), summarised from the deployed CDK template. ARNs and the account ID are left out on purpose.
+Resources in the CloudFormation stack `TalkingDrumStack` (us-east-1), summarised from the synthesised CDK template (`cdk synth`); the counts match the deployed stack by construction. ARNs and the account ID are left out on purpose.
 
 | Resource type | Count | What it is |
 |---|---|---|
@@ -112,12 +118,12 @@ Resources in the CloudFormation stack `TalkingDrumStack` (us-east-1), summarised
 
 Live checks from my terminal on 7 Nov 2026:
 - `curl -I` on the live site returns `200`, served by CloudFront, with all six security headers: `Strict-Transport-Security`, `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`.
-- `GET /drum` returns `{"count":16}`: 16 rhythms had crossed the cloud.
+- `GET /drum` returns a small counter (16 when I checked, 7 Nov 2026).
 - `POST /drum` with an invalid phrase returns `400`.
 
 ### Uptime monitoring and security
 
-- **Uptime:** the CloudWatch Synthetics canary runs every hour against the live URL. It fails if the page is not `200` or the hint text is missing. A failure alarms to my `ops-alerts` SNS topic. Lambda errors and API 5xx errors alarm too.
+- **Uptime:** the CloudWatch Synthetics canary runs every hour against the live URL. It fails if the page is not `200` or the hint text is missing. A failure alarms to my `ops-alerts` SNS topic. Lambda errors and API 5xx errors alarm too. The hourly canary and alarms stay on through the judging window.
 - **Security headers:** set in `customHttp.yml` at the repo root, which Amplify applies to every response. The Content-Security-Policy allows `connect-src` only to my API host.
 - **Abuse limits:** API Gateway throttling (POST 2 rps / burst 10), a strict input regex, at most one email a minute, and a $5 budget alert.
 - **No secrets** in the repo. No cookies, no trackers.
@@ -170,7 +176,7 @@ I built this with Claude Code as a coding agent, and I made the product, content
 
 ### Originality statement
 
-This portfolio is new and was built for this challenge. The GitHub repo was created on **6 Nov 2026 at 06:24 UTC**. The Amplify app is new, and its first deploy ran on **6 Nov 2026** (job #1 in the deploy history, screenshot AWS 01). No earlier portfolio site or code was reused. Design references were mood-board inspiration only. All text, artwork and photos are original or my own.
+This portfolio is new and was built for this challenge. The GitHub repo was created on **6 Nov 2026 at 06:24 UTC**. The Amplify app is new, and its first deploy ran on **6 Nov 2026**. No earlier portfolio site or code was reused. Design references were mood-board inspiration only. All text, artwork and photos are original or my own.
 
 ## What I learned
 
@@ -204,7 +210,7 @@ This portfolio is new and was built for this challenge. The GitHub repo was crea
 *06 — Recognition: AWS Certified Cloud Practitioner, 3rd place at Dev War, Huawei badges and a bootcamp. Community, talks and writing follow below it on the page.*
 
 ![Hero on a phone](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/10-mobile-hero.png)
-*10 — Hero on a phone (390×844). The drum hint is above the fold.*
+*10 — Hero on a phone (390×844). Name, titles, the tagline, and the drum hint, all above the fold.*
 
 ![Drum on a phone](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/11-mobile-drum.png)
 *11 — The drum on a phone (`/#drum`). Both pads fit on screen as large tap targets, with the live "rhythms have crossed the cloud" counter from DynamoDB.*
@@ -213,6 +219,8 @@ This portfolio is new and was built for this challenge. The GitHub repo was crea
 *12 — The /how-it-works/ page explains the architecture on the site itself, with the same diagram.*
 
 **Accessibility:** WCAG 2.2 AA is the target. Automated axe checks run in the end-to-end tests on the home page, /how-it-works/ and Stage Mode, at desktop and phone widths. The drum is fully playable by keyboard, every message is announced through an `aria-live` region, and "Read the messages" gives a text list of all of them. Sound is never needed to understand anything. `prefers-reduced-motion` turns off smooth scrolling, reveals, pulses and 3D animation.
+
+Accessibility, best practices and SEO all score 100 on mobile. Performance is 56, and challenge 3 above explains why.
 
 **Scores (mobile, Lighthouse, live URL, median of 3 runs, 6–7 Nov 2026):**
 
@@ -245,8 +253,9 @@ Thanks for reading, and play the drum: https://main.d2edrxdeaouf1j.amplifyapp.co
    - `aws-07-sqs.png` — SQS → `village-archive` → Send and receive messages → Poll for messages → open one message body.
    - `aws-08-canary.png` — CloudWatch → Synthetics → `drum-site-heartbeat` → passing runs.
    - `aws-09-budgets.png` — Billing → Budgets → `talking-drum-monthly`.
-   - Minimum is 4 (D5). If short on time, take 01, 03, 06 and 08, and delete the image lines for the ones you skip.
-3. **Redaction rule (every console shot):** blur or crop the **12-digit account ID** (top-right account menu, and inside any ARN), **every ARN**, and **every email address except josuefotseu02@gmail.com** (the ops-alerts and budget emails must be hidden). No phone numbers, IDs or addresses anywhere.
+   - Minimum is 4 (D5). If short on time, take 01, 03, 06 and 08, and delete the image lines for the ones you skip. After inserting shots, make sure the D5 row and the section only mention services you actually screenshotted.
+   - For `aws-06-sns.png`: check that the email subscription shows "Confirmed" before you shoot it.
+3. **Redaction rule (every console shot):** blur or crop the **12-digit account ID** (top-right account menu, and inside any ARN), **every ARN**, and **every email address except josuefotseu02@gmail.com** (the ops-alerts and budget emails must be hidden). SQS queue URLs and Lambda/SNS ARNs contain the account ID: blur them, and crop the browser tab title and URL bar too. No phone numbers, IDs or addresses anywhere.
 4. **Optional:** after `aws login`, run `aws amplify list-jobs --app-id d2edrxdeaouf1j --branch-name main --region us-east-1` and add job #1's exact start time to the originality statement.
 5. **Confirm** your Builder Center profile is student-verified.
 6. **Publish** under **"Your project"** on the AWS Student Builder Challenge page. Title: `🥁 Joshua.Cloud — Before SNS, there was the drum`. Paste everything above the `---` line. Keep the `#student-builders` tag.

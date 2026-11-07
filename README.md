@@ -41,6 +41,8 @@ Submission write-up: [docs/submission/project-post.md](docs/submission/project-p
 
 ![The drum after one phrase: message card with "Delivered via Amazon SNS"](docs/submission/screenshots/08-message-delivered.png)
 
+*After one phrase: "Delivered via Amazon SNS".*
+
 ## Stack
 
 Next.js (App Router, `output: 'export'`) · TypeScript · Tailwind CSS v4 · GSAP + Lenis · Web Audio API · Vitest · Playwright + axe · AWS CDK v2.

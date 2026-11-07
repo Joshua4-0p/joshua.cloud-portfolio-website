@@ -88,3 +88,17 @@ test('demo video + delivered screenshot', async ({ browser }) => {
   copyFileSync(await video.path(), VIDEO);
   expect(posts).toBeLessThanOrEqual(2);
 });
+
+// Re-shoot only the two hero frames (no phrase, no POST): -g "hero shots".
+test('hero shots', async ({ browser }) => {
+  for (const [name, opts] of [
+    ['01-hero-desktop', { viewport: { width: 1440, height: 900 } }],
+    ['10-mobile-hero', { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }],
+  ] as const) {
+    const ctx = await browser.newContext(opts);
+    await noPosts(ctx);
+    const page = await ctx.newPage();
+    await page.goto('/'); await settle(page, 3500); await shot(page, name);
+    await ctx.close();
+  }
+});
