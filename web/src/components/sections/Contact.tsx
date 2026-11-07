@@ -16,7 +16,7 @@ export default function Contact() {
       <div className="mx-auto max-w-[1600px]">
         <h2 id="contact-title" className="font-display flex flex-wrap items-center gap-x-6 text-[clamp(64px,15vw,250px)]">
           <span className="inline-flex items-center gap-[0.12em]">
-            <img src="/images/headshot-640.webp" alt="" width={640} height={640} loading="lazy"
+            <img src="/images/portrait-chip-320.webp" alt={`${profile.name} on stage in a green suit`} width={320} height={320} loading="lazy"
               className="inline-block h-[0.7em] w-[0.7em] rounded-full object-cover ring-2 ring-copper" />
             Let&rsquo;s
           </span>

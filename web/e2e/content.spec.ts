@@ -22,3 +22,10 @@ test('no horizontal scroll at 360px; nav link reaches its section', async ({ pag
   await page.getByRole('link', { name: /WORK/ }).click();
   await expect(page.locator('section#work')).toBeInViewport();
 });
+
+test('hero tagline does not overlap the marquee at 1440x900', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 }); await page.goto('/');
+  const t = (await page.getByTestId('tagline').boundingBox())!;
+  const m = (await page.getByTestId('marquee').boundingBox())!;
+  expect(t.y + t.height).toBeLessThanOrEqual(m.y);
+});

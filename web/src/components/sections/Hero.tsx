@@ -16,8 +16,8 @@ export default function Hero() {
       }}
     >
       {/* Marquee name, behind the drum */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[3svh] z-0 select-none overflow-hidden md:bottom-[4svh]">
-        <div className="marquee-track font-display whitespace-nowrap text-[26vw] leading-[0.8] text-bone/95 md:text-[17vw]">
+      <div data-testid="marquee" aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[3svh] z-0 select-none overflow-hidden md:bottom-[4svh]">
+        <div className="marquee-track font-display whitespace-nowrap text-[20vw] leading-[0.8] text-bone/95 md:text-[13vw]">
           <span className="pr-[0.25em]">{MARQUEE}{MARQUEE}</span>
           <span className="pr-[0.25em]">{MARQUEE}{MARQUEE}</span>
         </div>
@@ -25,7 +25,7 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-5 pt-24 md:block md:px-10 md:pt-0">
         {/* Right: name + titles */}
-        <div className="md:absolute md:right-10 md:top-[30%] md:max-w-[30%] lg:max-w-[28%]">
+        <div className="relative z-20 md:absolute md:right-10 md:top-[26%] md:max-w-[30%] md:rounded-xl md:bg-ink md:p-4 lg:max-w-[28%]">
           <span aria-hidden="true" className="mb-4 hidden text-2xl text-copper md:block">↘</span>
           <h1 id="hero-title">
             <span className="mb-3 block font-mono text-xs tracking-[0.25em] text-copper-hi">{profile.name.toUpperCase()}</span>
@@ -37,7 +37,7 @@ export default function Hero() {
           </h1>
           <p className="mt-3 font-mono text-[13px] tracking-wide text-ash">{profile.titlesSecondary.join(' · ')}</p>
           <p className="mt-1 font-mono text-[13px] tracking-wide text-ash">{profile.location}</p>
-          <p className="mt-2 text-sm italic text-bone/80">{profile.tagline}</p>
+          <p data-testid="tagline" className="mt-2 text-[15px] italic text-bone">{profile.tagline}</p>
         </div>
 
         {/* Centre: the drum (poster first, 3D after idle). Tapping it is a teaser; the real drum is below. */}

@@ -10,7 +10,6 @@ const out = path.resolve(here, '../public/images');
 mkdirSync(out, { recursive: true });
 
 const map = {
-  'headshot-blue-suit.png': 'headshot',
   'speaker-green-suit.png': 'speaker',
   'flyer-unbreakable-cloud-2026-10-31.jpg': 'flyer',
   'PXL_20260117_130945347.MP.jpg': 'odc-talk-1',

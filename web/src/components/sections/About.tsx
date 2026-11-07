@@ -35,14 +35,14 @@ export default function About() {
             <div className="relative h-56 w-44 shrink-0 overflow-hidden rounded-2xl md:h-72 md:w-56">
               <img
                 data-parallax
-                src="/images/headshot-640.webp"
-                srcSet="/images/headshot-640.webp 640w, /images/headshot-1280.webp 1280w"
+                src="/images/speaker-640.webp"
+                srcSet="/images/speaker-640.webp 640w, /images/speaker-1280.webp 1280w"
                 sizes="(min-width: 768px) 224px, 176px"
-                alt={`Portrait of ${profile.name}`}
+                alt={`${profile.name} on stage in a green suit`}
                 width={640}
                 height={640}
                 loading="lazy"
-                className="h-[112%] w-full object-cover"
+                className="h-[112%] w-full object-cover object-[40%_0%]"
               />
             </div>
             <MagneticButton href="#superpowers" className="h-32 w-32 bg-ink text-sm text-bone md:h-40 md:w-40">

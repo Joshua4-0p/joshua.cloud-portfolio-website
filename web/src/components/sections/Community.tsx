@@ -1,6 +1,6 @@
-import { community, experience, talks, writing, photos, profile } from '@/content/site';
+import { community, talks, writing, photos, profile } from '@/content/site';
 
-function Timeline({ items }: { items: { org: string; role: string; period: string; summary: string }[] }) {
+export function Timeline({ items }: { items: { org: string; role: string; period: string; summary: string }[] }) {
   return (
     <ol className="border-t rule">
       {items.map((e) => (
@@ -30,12 +30,7 @@ export default function Community() {
           Community <span className="text-copper">&amp;</span> Speaking
         </h2>
 
-        <div id="experience" className="mt-16 scroll-mt-24">
-          <Label>EXPERIENCE</Label>
-          <Timeline items={experience} />
-        </div>
-
-        <div className="mt-20">
+        <div className="mt-16">
           <Label>COMMUNITY ROLES</Label>
           <Timeline items={community} />
         </div>

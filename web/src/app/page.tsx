@@ -5,6 +5,7 @@ import About from '@/components/sections/About';
 import Superpowers from '@/components/sections/Superpowers';
 import Work from '@/components/sections/Work';
 import Recognition from '@/components/sections/Recognition';
+import Experience from '@/components/sections/Experience';
 import Community from '@/components/sections/Community';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/sections/Footer';
@@ -21,6 +22,7 @@ export default function Home() {
         <Superpowers />
         <Work />
         <Recognition />
+        <Experience />
         <Community />
         <DrumSection initialMode="normal" />
         <Contact />
