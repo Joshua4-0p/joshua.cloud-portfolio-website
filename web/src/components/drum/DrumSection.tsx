@@ -75,11 +75,15 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   // Stage Mode groove: plays while in stage with sound on; follows the sound toggle both ways.
   useEffect(() => {
     if (!state.stage || !soundOn) return;
-    audio.startClave();
-    // Pause on a hidden tab; resume only while this effect (stage + sound) is still current.
-    const onVis = () => (document.hidden ? audio.stopClave() : audio.startClave());
+    // Plays only while the tab is visible AND #drum is on screen; this effect exists only while stage + sound are on.
+    let vis = !document.hidden, inView = false;
+    const sync = () => (vis && inView ? audio.startClave() : audio.stopClave());
+    const onVis = () => { vis = !document.hidden; sync(); };
+    const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); });
+    const el = document.getElementById('drum');
+    if (el) io.observe(el);
     document.addEventListener('visibilitychange', onVis);
-    return () => { document.removeEventListener('visibilitychange', onVis); audio.stopClave(); };
+    return () => { io.disconnect(); document.removeEventListener('visibilitychange', onVis); audio.stopClave(); };
   }, [state.stage, soundOn]);
 
   const exit = useCallback(() => {
