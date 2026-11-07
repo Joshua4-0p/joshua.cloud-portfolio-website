@@ -76,7 +76,10 @@ export default function DrumSection({ initialMode = 'normal' }: { initialMode?: 
   useEffect(() => {
     if (!state.stage || !soundOn) return;
     audio.startClave();
-    return () => audio.stopClave();
+    // Pause on a hidden tab; resume only while this effect (stage + sound) is still current.
+    const onVis = () => (document.hidden ? audio.stopClave() : audio.startClave());
+    document.addEventListener('visibilitychange', onVis);
+    return () => { document.removeEventListener('visibilitychange', onVis); audio.stopClave(); };
   }, [state.stage, soundOn]);
 
   const exit = useCallback(() => {

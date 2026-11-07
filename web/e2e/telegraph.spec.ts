@@ -16,7 +16,7 @@ test('delivery line and counter appear when the API answers', async ({ page }) =
   await expect(page.getByText('42 rhythms have crossed the cloud')).toBeVisible();
   await phrase(page, 'LHLH');
   await expect(delivered(page)).toHaveText('Delivered via Amazon SNS · msg abcd… · rhythm #42');
-  await expect(page.getByText('Before SNS, there was the drum.', { exact: false }).first()).toBeVisible();
+  await expect(page.locator('#drum').getByText('Before SNS, there was the drum.', { exact: false }).first()).toBeVisible();
 });
 
 test('API failure is silent: message card, no delivery line, no counter', async ({ page }) => {

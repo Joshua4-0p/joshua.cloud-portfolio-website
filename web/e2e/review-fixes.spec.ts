@@ -94,6 +94,7 @@ test('contact button never overlaps the title at any width', async ({ page }) =>
     });
     const overlap = h.x < b.x + b.width && b.x < h.x + h.width && h.y < b.y + b.height && b.y < h.y + h.height;
     expect(overlap, `overlap at ${width}`).toBe(false);
+    if (width === 390) expect(Math.abs(b.width - b.height), 'button is round at 390').toBeLessThanOrEqual(2);
   }
 });
 test('keyboard focus keeps the round pad radius', async ({ page }) => {

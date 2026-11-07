@@ -8,7 +8,7 @@ test('first message within one phrase, keyboard + pointer', async ({ page }) => 
   const [low, high] = [await at('Low drum'), await at('High drum')];
   for (const [x, y] of [low, high, low, high]) await page.mouse.click(x, y);
   await expect(page.getByText('1 / 8 messages decoded')).toBeVisible();
-  await expect(page.getByText('Before SNS, there was the drum.', { exact: false }).first()).toBeVisible();
+  await expect(page.locator('#drum').getByText('Before SNS, there was the drum.', { exact: false }).first()).toBeVisible();
 });
 test('pad hit counts once per pointer tap and once per key press', async ({ page }) => {
   await page.goto('/#drum'); await page.getByRole('button', { name: 'Low drum' }).focus();

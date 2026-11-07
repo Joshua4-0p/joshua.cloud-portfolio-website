@@ -37,12 +37,13 @@ export default function Hero() {
           </h1>
           <p className="mt-3 font-mono text-[13px] tracking-wide text-ash">{profile.titlesSecondary.join(' · ')}</p>
           <p className="mt-1 font-mono text-[13px] tracking-wide text-ash">{profile.location}</p>
+          <p className="mt-2 text-sm italic text-bone/80">{profile.tagline}</p>
         </div>
 
         {/* Centre: the drum (poster first, 3D after idle). Tapping it is a teaser; the real drum is below. */}
         <div className="relative mx-auto mt-4 w-full max-w-[480px] text-center md:absolute md:left-[41%] md:top-[20%] md:mt-0 md:w-[42vw] md:max-w-[760px] md:-translate-x-1/2">
           <DrumCanvas variant="hero" />
-          <a href="#drum" className="relative -mt-4 inline-block font-mono text-xs tracking-[0.2em] text-copper-hi hover:text-bone">Play me below ↓</a>
+          <a href="#drum" className="relative -mt-4 inline-flex min-h-6 items-center font-mono text-xs tracking-[0.2em] text-copper-hi hover:text-bone">Play me below ↓</a>
         </div>
 
         {/* Left: the drum hint */}
