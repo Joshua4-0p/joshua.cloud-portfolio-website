@@ -23,7 +23,7 @@ I'm Tiaya Fotseu Josue, a Cloud & DevOps Engineer and Serverless Developer from 
 | **D2** Three core sections: About Me, Skills / Tech Superpowers, Projects or Achievements | Nav links and anchors: [About](https://main.d2edrxdeaouf1j.amplifyapp.com/#about), [Superpowers](https://main.d2edrxdeaouf1j.amplifyapp.com/#superpowers), [Work](https://main.d2edrxdeaouf1j.amplifyapp.com/#work), plus Recognition and Community. Screenshots 02–06. All sections are static HTML and readable without JavaScript. |
 | **D3** One creative feature that does not get in the way of navigation | **The Talking Drum** ([/#drum](https://main.d2edrxdeaouf1j.amplifyapp.com/#drum)). Visible hint in the hero: "The drum has a message for you — tap it". Opt-in, no splash screen, no forced sound, nav always works, Stage Mode exits with one button, any nav link, or Escape while the drum has focus. Works with mouse, touch and keyboard. Screenshots 07–09, 11 and the demo GIF. |
 | **D4** Link to the GitHub repository | https://github.com/Joshua4-0p/joshua.cloud-portfolio-website (public), linked in the site footer and on /how-it-works/. |
-| **D5** Screenshots of the portfolio and the AWS setup, AWS services documented, learnings and challenges | 12 portfolio screenshots, the architecture diagram, a demo GIF, and AWS console screenshots (see "AWS console screenshots" below), each with a caption. Services table with purpose and monthly cost under "Working AWS implementation". "What I learned" and "Challenges I hit" below. |
+| **D5** Screenshots of the portfolio and the AWS setup, AWS services documented, learnings and challenges | 12 portfolio screenshots, the architecture diagram, a demo GIF, and 8 AWS CLI captures of the live AWS setup (account ID and ARNs redacted), each with a caption. Services table with purpose and monthly cost under "Working AWS implementation". "What I learned" and "Challenges I hit" below. |
 | **D6** Original, unpublished website | New repo created on 6 Nov 2026 at 06:24 UTC. New Amplify app, first deployed on 6 Nov 2026. See the originality statement under "Communication quality". |
 
 ## Creativity and memorability
@@ -128,34 +128,33 @@ Live checks from my terminal on 7 Nov 2026:
 - **Abuse limits:** API Gateway throttling (POST 2 rps / burst 10), a strict input regex, at most one email a minute, and a $5 budget alert.
 - **No secrets** in the repo. No cookies, no trackers.
 
-### AWS console screenshots
+### AWS evidence: live CLI captures
 
-![Amplify app overview and deploy history](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-01-amplify.png)
-*AWS 01 — AWS Amplify Hosting: the app, the `main` branch, and its deploy history, every build "Deployed".*
+These are real, read-only AWS CLI calls against the live setup in us-east-1, rendered as images. The account ID and every ARN are redacted. (There is no AWS 02: the security headers are shown by the `curl -I` check above.)
 
-![Amplify custom headers](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-02-amplify-headers.png)
-*AWS 02 — Amplify custom headers: HSTS, CSP, X-Frame-Options and the rest, read from `customHttp.yml`.*
+![AWS CLI capture of the Amplify app and its deploy jobs](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-01-amplify.png)
+*AWS 01 — AWS CLI capture (read-only), AWS Amplify Hosting. `get-app` shows the `WEB` app on my GitHub repo with branch `main` at status `SUCCEED`. `list-jobs` shows the latest deploy jobs, every one `SUCCEED`.*
 
-![API Gateway routes and throttling](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-03-api-gateway.png)
-*AWS 03 — Amazon API Gateway: the HTTP API with `GET /drum` and `POST /drum`, and the stage throttling (2 rps, burst 10).*
+![AWS CLI capture of the API Gateway routes](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-03-api-gateway.png)
+*AWS 03 — AWS CLI capture (read-only), Amazon API Gateway. The HTTP API has exactly two routes, `GET /drum` and `POST /drum`, and both go to the same Lambda integration.*
 
-![Lambda function overview](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-04-lambda.png)
-*AWS 04 — AWS Lambda: the drum function, Node.js 22 on arm64, triggered by API Gateway.*
+![AWS CLI capture of the Lambda function configuration](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-04-lambda.png)
+*AWS 04 — AWS CLI capture (read-only), AWS Lambda. The drum function is `Active` on `nodejs22.x`, with 128 MB and a 3 s timeout. Its environment points at the DynamoDB table and the SNS topic (ARN redacted).*
 
-![DynamoDB counter item](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-05-dynamodb.png)
-*AWS 05 — Amazon DynamoDB: the `drums` item that holds the "rhythms have crossed the cloud" counter.*
+![AWS CLI capture of the DynamoDB counter item](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-05-dynamodb.png)
+*AWS 05 — AWS CLI capture (read-only), Amazon DynamoDB. The `drums` item holds the live counter (`count` 18 at capture time) and the `minute` stamp that limits email to one a minute.*
 
-![SNS topic with two subscriptions](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-06-sns.png)
-*AWS 06 — Amazon SNS: the `drum-telegraph` topic and its two confirmed subscriptions, SQS and email (with the filter policy).*
+![AWS CLI capture of the SNS topic subscriptions](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-06-sns.png)
+*AWS 06 — AWS CLI capture (read-only), Amazon SNS. The `drum-telegraph` topic has 2 subscriptions, `sqs` and `email`. Both have a subscription ARN (redacted) instead of `PendingConfirmation`, so both are confirmed.*
 
-![SQS message received](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-07-sqs.png)
-*AWS 07 — Amazon SQS: a rhythm received in the `village-archive` queue.*
+![AWS CLI capture of the SQS queue attributes](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-07-sqs.png)
+*AWS 07 — AWS CLI capture (read-only), Amazon SQS. The `village-archive` queue holds 18 archived rhythms (`ApproximateNumberOfMessages`). It has SSE on, 4-day retention, and a policy that lets only SNS send to it.*
 
-![CloudWatch Synthetics canary passing](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-08-canary.png)
-*AWS 08 — Amazon CloudWatch Synthetics: the hourly `drum-site-heartbeat` canary, passing.*
+![AWS CLI capture of the CloudWatch Synthetics canary runs](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-08-canary.png)
+*AWS 08 — AWS CLI capture (read-only), Amazon CloudWatch Synthetics. The `drum-site-heartbeat` canary shows 6 hourly runs in a row, all `PASSED`, on 7 Nov 2026.*
 
-![AWS Budgets monthly budget](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-09-budgets.png)
-*AWS 09 — AWS Budgets: the $5 monthly budget with alerts at $1 and $5.*
+![AWS CLI capture of the AWS Budgets budgets](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/aws-09-budgets.png)
+*AWS 09 — AWS CLI capture (read-only), AWS Budgets. `talking-drum-monthly` is a $5 monthly cost budget (the other one is my account-wide budget).*
 
 ## Communication quality
 
@@ -195,7 +194,7 @@ This portfolio is new and was built for this challenge. The GitHub repo was crea
 **Sections:** Hero → About → Superpowers (skills with evidence) → Work (six projects, each with a case study) → Recognition (certifications and awards) → Community (volunteering, talks, writing) → Contact. The core sections and the drum have nav links, every section has an anchor, and all content is in static HTML.
 
 ![About section](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/02-about.png)
-*02 — About: where I'm from, my studies, my work at DIGISOL Group and Cloud Builders Africa, and what I'm building now.*
+*02 — About: where I'm from, my studies, my work at DIGISOL Group and Cloud Builders Africa, what I'm building now, and a photo of me at an event stage.*
 
 ![Superpowers section](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/03-superpowers.png)
 *03 — Superpowers: skill groups (Cloud & Serverless on AWS, Security & Resilience, DevOps, Full-Stack and more), each tied to evidence.*
@@ -212,8 +211,8 @@ This portfolio is new and was built for this challenge. The GitHub repo was crea
 ![Hero on a phone](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/10-mobile-hero.png)
 *10 — Hero on a phone (390×844). Name, titles, the tagline, and the drum hint, all above the fold.*
 
-![Drum on a phone](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/11-mobile-drum.png)
-*11 — The drum on a phone (`/#drum`). Both pads fit on screen as large tap targets, with the live "rhythms have crossed the cloud" counter from DynamoDB.*
+![The drum's 3D stage on a phone with the SNS fan-out labels](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/11-mobile-drum.png)
+*11 — The drum on a phone, right after one real phrase. The 3D stage shows the fan-out: the Amazon SNS topic and its two subscribers, my inbox (email) and the village archive (SQS). Above it is the live DynamoDB counter (21 rhythms at capture time).*
 
 ![How it's built page](https://raw.githubusercontent.com/Joshua4-0p/joshua.cloud-portfolio-website/main/docs/submission/screenshots/12-how-it-works.png)
 *12 — The /how-it-works/ page explains the architecture on the site itself, with the same diagram.*
@@ -243,19 +242,8 @@ Thanks for reading, and play the drum: https://main.d2edrxdeaouf1j.amplifyapp.co
 **Deadline: 7 Nov 2026, 08:59 WAT (6 Nov 23:59 PST). Aim to publish by 08:30.**
 
 1. **Push first.** The images in the post load from `raw.githubusercontent.com/.../main/...`. After the commit is pushed, open one image link to check it loads. If the editor doesn't render remote images, upload each PNG from `docs/submission/screenshots/` at its place instead.
-2. **Take the 9 AWS console screenshots** (region us-east-1). Save them as PNG in `docs/submission/screenshots/` with these exact names, then commit and push (or upload them in the editor):
-   - `aws-01-amplify.png` — Amplify → app `d2edrxdeaouf1j` → `main` branch overview with the deploy history (job #1 visible if possible).
-   - `aws-02-amplify-headers.png` — Amplify → Hosting → Custom headers.
-   - `aws-03-api-gateway.png` — API Gateway → the HTTP API → Routes (`GET /drum`, `POST /drum`); and/or Stages → `$default` → throttling 2 / 10.
-   - `aws-04-lambda.png` — Lambda → the drum function overview (API Gateway trigger, Node.js 22, arm64).
-   - `aws-05-dynamodb.png` — DynamoDB → the stack's table → Explore items → the `drums` item with its count.
-   - `aws-06-sns.png` — SNS → Topics → `drum-telegraph` → Subscriptions (2 confirmed: SQS + email).
-   - `aws-07-sqs.png` — SQS → `village-archive` → Send and receive messages → Poll for messages → open one message body.
-   - `aws-08-canary.png` — CloudWatch → Synthetics → `drum-site-heartbeat` → passing runs.
-   - `aws-09-budgets.png` — Billing → Budgets → `talking-drum-monthly`.
-   - Minimum is 4 (D5). If short on time, take 01, 03, 06 and 08, and delete the image lines for the ones you skip. After inserting shots, make sure the D5 row and the section only mention services you actually screenshotted.
-   - For `aws-06-sns.png`: check that the email subscription shows "Confirmed" before you shoot it.
-3. **Redaction rule (every console shot):** blur or crop the **12-digit account ID** (top-right account menu, and inside any ARN), **every ARN**, and **every email address except josuefotseu02@gmail.com** (the ops-alerts and budget emails must be hidden). SQS queue URLs and Lambda/SNS ARNs contain the account ID: blur them, and crop the browser tab title and URL bar too. No phone numbers, IDs or addresses anywhere.
+2. **AWS images are done.** The post already has 8 AWS CLI captures (`aws-01`, `aws-03` … `aws-09`), with the account ID and ARNs redacted. Console screenshots are now optional extras. If you add any, save them as PNG in `docs/submission/screenshots/`, caption them, and blur or crop the **12-digit account ID**, **every ARN**, the SQS queue URL, the browser tab title and URL bar, and **every email address except josuefotseu02@gmail.com**.
+3. **No phone numbers, IDs or addresses anywhere** in anything you add.
 4. **Optional:** after `aws login`, run `aws amplify list-jobs --app-id d2edrxdeaouf1j --branch-name main --region us-east-1` and add job #1's exact start time to the originality statement.
 5. **Confirm** your Builder Center profile is student-verified.
 6. **Publish** under **"Your project"** on the AWS Student Builder Challenge page. Title: `🥁 Joshua.Cloud — Before SNS, there was the drum`. Paste everything above the `---` line. Keep the `#student-builders` tag.

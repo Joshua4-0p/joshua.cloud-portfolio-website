@@ -37,6 +37,8 @@ Infrastructure is AWS CDK v2 (TypeScript) in [`infra/`](infra/), region us-east-
 
 Lighthouse, mobile, live URL (median of 3 runs): **Performance 56 · Accessibility 100 · Best Practices 100 · SEO 100.** Performance misses the 90 target because of the 3D scene and the motion layer; deferring both until the first interaction measured 74 locally and is the next step. Full QA record: [docs/submission/qa.md](docs/submission/qa.md).
 
+AWS evidence: 8 read-only AWS CLI captures of the live setup (Amplify, API Gateway, Lambda, DynamoDB, SNS, SQS, CloudWatch Synthetics, Budgets; account ID and ARNs redacted) in [docs/submission/screenshots/](docs/submission/screenshots/) (`aws-*.png`).
+
 Submission write-up: [docs/submission/project-post.md](docs/submission/project-post.md) · Screenshots: [docs/submission/screenshots/](docs/submission/screenshots/) · Demo: [GIF](docs/submission/demo.gif), [MP4](docs/submission/demo.mp4).
 
 ![The drum after one phrase: message card with "Delivered via Amazon SNS"](docs/submission/screenshots/08-message-delivered.png)

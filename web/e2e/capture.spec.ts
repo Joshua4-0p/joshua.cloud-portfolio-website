@@ -54,17 +54,29 @@ test('desktop sections', async ({ browser }) => {
   await ctx.close();
 });
 
+// Real POST #1 of this file: the phone stage after a delivered phrase (fan-out labels lit).
+let lastPost = 0;
 test('mobile', async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  await noPosts(ctx);
+  let posts = 0;
+  await ctx.route('**/drum', (r) => (r.request().method() !== 'POST' ? r.continue() : ++posts === 1 ? r.continue() : r.abort()));
   const page = await ctx.newPage();
   await page.goto('/'); await settle(page, 3500); await shot(page, '10-mobile-hero');
-  await page.goto('/#drum'); await settle(page, 3500); await shot(page, '11-mobile-drum');
+  await page.goto('/#drum'); await settle(page, 3500);
+  for (const t of 'LHLH') { await page.getByRole('button', { name: t === 'L' ? 'Low drum' : 'High drum' }).tap(); await page.waitForTimeout(380); }
+  lastPost = Date.now();
+  await expect(page.getByText('Delivered via Amazon SNS')).toBeVisible({ timeout: 8000 });
+  // On phones the 3D stage sits below the pads: centre it so the lit fan-out labels are in frame.
+  await page.evaluate(() => (document.querySelector('#drum canvas') ?? document.querySelector('#drum'))!.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(900); await shot(page, '11-mobile-drum');
+  await page.waitForTimeout(1500); await page.screenshot({ path: path.join(path.dirname(VIDEO), '11b-mobile-drum-later.png') });
   await ctx.close();
 });
 
 // The one real phrase: hero → hint → 4 hits (LHLH, real POST) → delivered card → secret phrase (POST aborted) → Stage Mode.
 test('demo video + delivered screenshot', async ({ browser }) => {
+  // Email is capped at 1/min: keep real POSTs at least 65 s apart.
+  if (lastPost) await new Promise((r) => setTimeout(r, Math.max(0, lastPost + 65_000 - Date.now())));
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: { dir: path.dirname(VIDEO), size: { width: 1280, height: 720 } } });
   let posts = 0;
   await ctx.route('**/drum', (r) => {
