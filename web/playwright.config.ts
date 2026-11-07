@@ -4,6 +4,8 @@ const external = process.env.BASE_URL;
 
 export default defineConfig({
   testDir: 'e2e',
+  // Submission captures hit the live API: run only with CAPTURE=1 (see e2e/capture.spec.ts).
+  testIgnore: process.env.CAPTURE ? undefined : /capture\.spec\.ts/,
   timeout: 30_000,
   retries: external ? 1 : 0,
   reporter: [['list']],

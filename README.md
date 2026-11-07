@@ -4,6 +4,10 @@ Portfolio of **Tiaya Fotseu Josue** — Cloud & DevOps Engineer · Serverless De
 
 **Live site:** https://main.d2edrxdeaouf1j.amplifyapp.com · **Play the drum:** https://main.d2edrxdeaouf1j.amplifyapp.com/#drum · **Stage Mode:** https://main.d2edrxdeaouf1j.amplifyapp.com/?mode=stage · **How it's built:** https://main.d2edrxdeaouf1j.amplifyapp.com/how-it-works/
 
+![Demo: hint, four drum hits, "Delivered via Amazon SNS", Stage Mode](docs/submission/demo.gif)
+
+*The hint, four beats, the message card confirming "Delivered via Amazon SNS", then Stage Mode (15 s, live site).*
+
 ## The one creative feature: The Talking Drum
 
 A two-tone slit drum, inspired by the talking-drum and slit-drum traditions of Cameroon and West & Central Africa. Play four beats (low ● / high ○) and the drum answers with one of eight messages about me. Each phrase is also published through a real AWS messaging system: API Gateway → Lambda → DynamoDB + SNS, fanned out to an SQS queue (every rhythm is archived) and email (at most one a minute, via an SNS subscription filter policy). Drummer = publisher, rhythm = message, villages = subscribers.
@@ -28,6 +32,14 @@ A two-tone slit drum, inspired by the talking-drum and slit-drum traditions of C
 | AWS Budgets | $1 / $5 monthly cost alerts | $0 |
 
 Infrastructure is AWS CDK v2 (TypeScript) in [`infra/`](infra/), region us-east-1. The site is a Next.js static export in [`web/`](web/) and works fully even if the API is unreachable.
+
+## Quality and submission
+
+Lighthouse, mobile, live URL (median of 3 runs): **Performance 56 · Accessibility 100 · Best Practices 100 · SEO 100.** Performance misses the 90 target because of the 3D scene and the motion layer; deferring both until the first interaction measured 74 locally and is the next step. Full QA record: [docs/submission/qa.md](docs/submission/qa.md).
+
+Submission write-up: [docs/submission/project-post.md](docs/submission/project-post.md) · Screenshots: [docs/submission/screenshots/](docs/submission/screenshots/) · Demo: [GIF](docs/submission/demo.gif), [MP4](docs/submission/demo.mp4).
+
+![The drum after one phrase: message card with "Delivered via Amazon SNS"](docs/submission/screenshots/08-message-delivered.png)
 
 ## Stack
 
