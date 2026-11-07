@@ -1,5 +1,12 @@
 import { test, expect, play as phrase } from './fixtures';
 import type { Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+
+// The live site calls the real API (docs/submission/urls.md); the e2e build calls the example host (scripts/build-e2e.mjs).
+const API_URL = process.env.BASE_URL
+  ? /^API_URL=(\S+)/m.exec(readFileSync(path.resolve(__dirname, '../../docs/submission/urls.md'), 'utf8'))![1]
+  : 'https://example.execute-api.us-east-1.amazonaws.com';
 
 const delivered = (page: Page) => page.getByText('Delivered via Amazon SNS');
 
@@ -46,4 +53,20 @@ test('secret phrase announces the message and Stage Mode together', async ({ pag
   const live = page.locator('[aria-live="polite"]');
   await expect(live).toContainText('Message 1 of 8');
   await expect(live).toContainText('Stage Mode on');
+});
+
+// Review Focus 2, no mocks: the API is simply unreachable (as with a CSP/CORS block or an outage).
+test('drum works with API blocked', async ({ page }) => {
+  const caught: string[] = [];
+  await page.route(API_URL + '/**', (r) => { caught.push(r.request().method()); return r.abort(); });
+  const errors: string[] = []; page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/#drum');
+  await phrase(page, 'LHLH');
+  await expect(page.getByText('1 / 8 messages decoded')).toBeVisible({ timeout: 1000 }); // instant, not after the 3 s client timeout
+  await expect(page.getByTestId('message-card')).toBeVisible();
+  await expect.poll(() => caught).toContain('POST'); // the block really sat in the request path
+  await page.waitForTimeout(500);
+  await expect(delivered(page)).toHaveCount(0);
+  await expect(page.getByText('rhythms have crossed the cloud')).toHaveCount(0);
+  expect(errors).toEqual([]);
 });

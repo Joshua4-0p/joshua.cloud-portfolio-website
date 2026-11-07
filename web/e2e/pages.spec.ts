@@ -23,3 +23,9 @@ test('footer link "How this site is built" resolves 200', async ({ page, request
   expect(href).toBe('/how-it-works/');
   expect((await request.get(href!)).status()).toBe(200);
 });
+
+test('on a phone the architecture diagram scrolls instead of shrinking its text', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/how-it-works/');
+  expect((await page.locator('svg[role="img"]').first().boundingBox())!.width).toBeGreaterThanOrEqual(720);
+});

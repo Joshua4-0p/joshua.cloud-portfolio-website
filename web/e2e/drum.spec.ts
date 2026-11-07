@@ -2,8 +2,11 @@ import { test, expect, blockApi, play } from './fixtures';
 
 test('first message within one phrase, keyboard + pointer', async ({ page }) => {
   await page.goto('/#drum');
-  const low = page.getByRole('button', { name: 'Low drum' }), high = page.getByRole('button', { name: 'High drum' });
-  await low.click(); await high.click(); await low.click(); await high.click();
+  // Raw mouse clicks at the pad centres: locator.click() waits for the hit animation to settle before each click, which
+  // under a loaded parallel run can stretch the phrase past the 2 s idle reset.
+  const at = async (n: string) => { const b = (await page.getByRole('button', { name: n }).boundingBox())!; return [b.x + b.width / 2, b.y + b.height / 2] as const; };
+  const [low, high] = [await at('Low drum'), await at('High drum')];
+  for (const [x, y] of [low, high, low, high]) await page.mouse.click(x, y);
   await expect(page.getByText('1 / 8 messages decoded')).toBeVisible();
   await expect(page.getByText('Before SNS, there was the drum.', { exact: false }).first()).toBeVisible();
 });
@@ -54,9 +57,14 @@ test('decoded progress survives a reload, and the 9th phrase replays message 1',
   await expect(page.getByText('8 / 8 messages decoded')).toBeVisible();
   await expect(page.getByTestId('message-card')).toContainText('started drumming in Lower Sixth');
 });
-// 390x844 only: a 360x640 variant was intermittently off (ratio 0.37) in full-suite runs and never alone; checked by hand instead.
-test('on a 390x844 phone, /#drum lands with both pads fully visible', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/#drum');
-  for (const n of ['Low drum', 'High drum']) await expect(page.getByRole('button', { name: n })).toBeInViewport({ ratio: 1 });
-});
+// Landing on /#drum on a phone must show both pads without scrolling (AC: the drum is playable on arrival).
+// 360x640 is left out: it lands right in isolation (30/30 runs, and under delayed fonts/CSS/JS/images) but about one
+// full-suite run in four sees the low pad at viewport ratio 0.37; root cause open (docs/submission/qa.md).
+for (const viewport of [{ width: 390, height: 844 }])
+  test.describe(() => {
+    test.use({ viewport }); // a phone-sized page from the start, not a desktop page resized
+    test(`on a ${viewport.width}x${viewport.height} phone, /#drum lands with both pads fully visible`, async ({ page }) => {
+      await page.goto('/#drum');
+      for (const n of ['Low drum', 'High drum']) await expect(page.getByRole('button', { name: n })).toBeInViewport({ ratio: 1 });
+    });
+  });

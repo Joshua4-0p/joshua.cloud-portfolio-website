@@ -1,18 +1,6 @@
 import { test, expect, blockApi, play } from './fixtures';
-import AxeBuilder from '@axe-core/playwright';
 
-// Phase-1 review fixes. Motion is ON here (default context), which is where SplitText runs.
-for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
-  test(`no serious/critical axe violations with motion on at ${vp.width}px`, async ({ page }) => {
-    await page.setViewportSize(vp);
-    await page.goto('/');
-    await page.waitForTimeout(1500); // let SplitText reveals run
-    const r = await new AxeBuilder({ page }).analyze();
-    const bad = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
-    expect(bad.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
-  });
-}
-
+// Phase-1 review fixes (the axe check moved to a11y.spec.ts).
 test('About lead sentence is exposed to assistive tech with motion on', async ({ page }) => {
   await page.goto('/'); await page.waitForTimeout(1500);
   await expect(page.locator('#about')).toMatchAriaSnapshot(`- paragraph: /I build serverless systems on AWS/`);
